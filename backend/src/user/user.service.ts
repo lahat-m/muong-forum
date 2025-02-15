@@ -36,14 +36,18 @@ export class UserService {
 	}
 
 	async createUser (data: CreateUserDto) {
-		const user = await this.prisma.user.create({
-			data: {
-				...data,
-				password: bcrypt.hashSync(data.password, roundsOfHashing),
-			},
-		});
+		try	{
+				const user = await this.prisma.user.create({
+				data: {
+					...data,
+					password: bcrypt.hashSync(data.password, roundsOfHashing),
+				},
+			});
 
-		return user;
+			return user;
+		} catch {
+			throw new BadRequestException("User already exists")
+		}
 	}
 
 }
