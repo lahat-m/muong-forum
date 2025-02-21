@@ -9,26 +9,29 @@ datasource db {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  username       String?   @unique
-  email          String    @unique
-  firstName      String?
-  lastName       String?
-  password       String
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  username  String?  @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
 
 model Event {
-  id          Int       @id @default(autoincrement())
-  title       String
-  description String
-  guestName   String
-  date        DateTime
-  location    String
+  id           Int          @id @default(autoincrement())
+  eventPoster  String?
+  title        String
+  eventFocus   String?
+  description  String
+  guestName    String
+  guestDesc    String?
+  date         DateTime
+  location     String
   locationType locationType
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
 }
 
 enum locationType {

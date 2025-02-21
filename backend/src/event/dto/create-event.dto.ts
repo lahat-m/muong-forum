@@ -30,4 +30,6 @@ export class CreateEventDto {
     @ApiProperty({ example: 'ONLINE', description: 'The location type of the event' })
     @IsEnum(LocationType)
     locationType: LocationType;
+	eventPoster: any;
+	eventFocus: any;
 }

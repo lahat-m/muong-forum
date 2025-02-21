@@ -23,7 +23,7 @@ export class UserController {
 
 	@Get(':id')
 	@UseGuards(JwtGuard)
-	@ApiOperation({ summary: 'Get one user by id' })
+	@ApiOperation({ summary: 'Get user by id' })
 	@ApiBearerAuth()
 	@ApiResponse({ status: 200, description: 'User found' })
 	async findOne(@Param('id', ParseIntPipe) id: number) {

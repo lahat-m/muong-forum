@@ -6,28 +6,31 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class EventService {
 
-	constructor (
+	constructor(
 		private readonly prisma: PrismaService
-	) {}
+	) { }
 
 	async create(createEventDto: CreateEventDto) {
 		try {
 			console.log(createEventDto)
 			const event = await this.prisma.event.create({
 				data: {
+					eventPoster: createEventDto.eventPoster,
 					title: createEventDto.title,
+					eventFocus: createEventDto.eventFocus,
 					description: createEventDto.description,
+					guestName: createEventDto.guestName,
 					date: createEventDto.date,
 					location: createEventDto.location,
 					locationType: createEventDto.locationType,
-					guestName: createEventDto.guestName
+
 				}
 			});
 
-			return {"status": "success", "message": "Event created successfully", "event": event};
+			return { "status": "success", "message": "Event created successfully", "event": event };
 		} catch (error) {
 			console.log(error)
-			return {"status": "error", "message": "Failed to create event"};
+			return { "status": "error", "message": "Failed to create event" };
 		}
 	}
 
@@ -38,7 +41,7 @@ export class EventService {
 	async findOne(id: number) {
 		return await this.prisma.event.findUnique({
 			where: {
-				id: id
+				id,
 			}
 		});
 	}
@@ -52,9 +55,9 @@ export class EventService {
 				data: updateEventDto
 			});
 
-			return {"status": "success", "message": "Event updated successfully", "event": event};
+			return { "status": "success", "message": "Event updated successfully", "event": event };
 		} catch {
-			return {"status": "error", "message": "Failed to update event"};
+			return { "status": "error", "message": "Failed to update event" };
 		}
 	}
 
@@ -66,9 +69,9 @@ export class EventService {
 				}
 			});
 
-			return {"status": "success", "message": "Event deleted successfully"};
+			return { "status": "success", "message": "Event deleted successfully" };
 		} catch {
-			return {"status": "error", "message": "Failed to delete event"};
+			return { "status": "error", "message": "Failed to delete event" };
 		}
 	}
 }

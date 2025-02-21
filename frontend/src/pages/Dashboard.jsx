@@ -1,20 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
+
+
 
 const Dashboard = () => {
 	const [events, setEvents] = useState([]);
 	const [formData, setFormData] = useState({
+		eventPoster: null,
 		title: '',
+		eventFocus: '',
 		description: '',
 		date: '',
 		time: '',
 		location: '',
 		locationType: 'ONSITE',
-		guestName: ''
+		guestName: '',
+		guestDesc: ''
 	});
 	const [loading, setLoading] = useState(false);
 	const [editingEvent, setEditingEvent] = useState(null);
+	const fileInputRef = useRef(null);
 
+
+	const [previewUrl, setPreviewUrl] = useState('');
+	const [selectedFile, setSelectedFile] = useState(null);
+
+	// Handle file selection
+	const handleFileSelect = (event) => {
+		const file = event.target.files[0];
+		if (!file) return;
+
+		setSelectedFile(file);
+		const fileUrl = URL.createObjectURL(file);
+		setPreviewUrl(fileUrl);
+	};
+
+	// Cleanup object URL
+	useEffect(() => {
+		return () => {
+			if (previewUrl) URL.revokeObjectURL(previewUrl);
+		};
+	}, [previewUrl]);
 	useEffect(() => {
 		fetchEvents();
 	}, []);
@@ -29,8 +55,12 @@ const Dashboard = () => {
 	};
 
 	const handleChange = (e) => {
-		const { name, value } = e.target;
-		setFormData({ ...formData, [name]: value });
+		const { name, value, type, files } = e.target;
+		if (type === 'file') {
+			setFormData({ ...formData, [name]: files[0] });
+		} else {
+			setFormData({ ...formData, [name]: value });
+		}
 	};
 
 	const handleSubmit = async (e) => {
@@ -41,20 +71,28 @@ const Dashboard = () => {
 				...formData,
 				date: new Date(`${formData.date}T${formData.time}:00.000Z`).toISOString()
 			};
+
 			if (editingEvent) {
 				await api.put(`/event/${editingEvent.id}`, formattedData);
 			} else {
 				await api.post('/event', formattedData);
 			}
+
+			// Reset form and file input
 			setFormData({
+				eventPoster: null,
 				title: '',
+				eventFocus: '',
 				description: '',
 				date: '',
 				time: '',
 				location: '',
 				locationType: 'ONSITE',
-				guestName: ''
+				guestName: '',
+				guestDesc: ''
 			});
+			if (fileInputRef.current) fileInputRef.current.value = '';
+
 			setEditingEvent(null);
 			fetchEvents();
 		} catch (error) {
@@ -65,7 +103,7 @@ const Dashboard = () => {
 	};
 
 	const handleEdit = (event) => {
-		setFormData(event);
+		setFormData({ ...event });
 		setEditingEvent(event);
 	};
 
@@ -84,11 +122,28 @@ const Dashboard = () => {
 			<form onSubmit={handleSubmit} className="mb-5">
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<input
+						type="file"
+						name="eventPoster"
+						ref={fileInputRef}
+						onChange={handleChange}
+						className="p-2 border border-gray-300 rounded"
+						required
+					/>
+					<input
 						type="text"
 						name="title"
 						value={formData.title}
 						onChange={handleChange}
 						placeholder="Event Title"
+						className="p-2 border border-gray-300 rounded"
+						required
+					/>
+					<input
+						type="text"
+						name="eventFocus"
+						value={formData.eventFocus}
+						onChange={handleChange}
+						placeholder="Event Focus"
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
@@ -145,6 +200,15 @@ const Dashboard = () => {
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
+					<input
+						type="text"
+						name="guestDesc"
+						value={formData.guestDesc}
+						onChange={handleChange}
+						placeholder="Guest Desc"
+						className="p-2 border border-gray-300 rounded"
+						required
+					/>
 				</div>
 				<button
 					type="submit"
@@ -159,11 +223,23 @@ const Dashboard = () => {
 				{events.map((event) => (
 					<div key={event.id} className="p-4 border border-gray-300 rounded">
 						<h3 className="text-lg font-bold">{event.title}</h3>
+						{/* Use the PosterImage component to render the poster */}
+						{event.eventPoster && (
+								<img
+									src={event.eventPoster}
+									alt={event.title}
+									className="w-full h-auto mb-2 rounded"
+								/>
+						)}
 						<p>{event.description}</p>
-						<p>{new Date(event.date).toLocaleDateString()} {event.time}</p>
+						<p>
+							{new Date(event.date).toLocaleDateString()}{' '}
+							{new Date(event.date).toLocaleTimeString()}
+						</p>
 						<p>{event.location}</p>
 						<p>{event.locationType}</p>
 						<p>{event.guestName}</p>
+						<p>{ event.guestDesc}</p>
 						<div className="flex justify-between mt-2">
 							<button
 								onClick={() => handleEdit(event)}
