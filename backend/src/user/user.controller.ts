@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CreateUserDto } from './dto/create-user.dto';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 
 @Controller('user')
@@ -21,7 +22,7 @@ export class UserController {
 
 
 	@Get(':id')
-	// @UseGuards(JwtGuard)
+	@UseGuards(JwtGuard)
 	@ApiOperation({ summary: 'Get one user by id' })
 	@ApiBearerAuth()
 	@ApiResponse({ status: 200, description: 'User found' })
