@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('event')
 export class EventController {
@@ -10,7 +13,28 @@ export class EventController {
 
   @ApiOperation({ summary: 'Create an event' })
   @Post()
-  create(@Body() createEventDto: CreateEventDto) {
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: 'uploads',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const fileExtName = extname(file.originalname);
+          callback(null, `${file.fieldname}-${uniqueSuffix}${fileExtName}`);
+        },
+      }),
+    })
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Event data with image',
+    type: CreateEventDto,
+  })
+  create(@Body() createEventDto: CreateEventDto, @UploadedFile() file: Express.Multer.File) {
+    if (file) {
+      // Save only the filename so the service can prepend BASE_URL
+      createEventDto.eventPoster = file.filename;
+    }
     return this.eventService.create(createEventDto);
   }
 

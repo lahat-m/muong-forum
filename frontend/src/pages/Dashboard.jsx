@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
-
-
+import PosterImage from '../components/PosterImage';
 
 const Dashboard = () => {
 	const [events, setEvents] = useState([]);
 	const [formData, setFormData] = useState({
-		eventPoster: null,
+		eventPoster: '',
 		title: '',
 		eventFocus: '',
 		description: '',
@@ -20,20 +19,7 @@ const Dashboard = () => {
 	const [loading, setLoading] = useState(false);
 	const [editingEvent, setEditingEvent] = useState(null);
 	const fileInputRef = useRef(null);
-
-
-	const [previewUrl, setPreviewUrl] = useState('');
-	const [selectedFile, setSelectedFile] = useState(null);
-
-	// Handle file selection
-	const handleFileSelect = (event) => {
-		const file = event.target.files[0];
-		if (!file) return;
-
-		setSelectedFile(file);
-		const fileUrl = URL.createObjectURL(file);
-		setPreviewUrl(fileUrl);
-	};
+	const [previewUrl, setPreviewUrl] = useState(null);
 
 	// Cleanup object URL
 	useEffect(() => {
@@ -55,32 +41,48 @@ const Dashboard = () => {
 	};
 
 	const handleChange = (e) => {
-		const { name, value, type, files } = e.target;
-		if (type === 'file') {
-			setFormData({ ...formData, [name]: files[0] });
-		} else {
-			setFormData({ ...formData, [name]: value });
-		}
+		const { name, value } = e.target;
+		setFormData({ ...formData, [name]: value });
+	};
+
+	const handleFileSelect = (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+		setFormData({ ...formData, eventPoster: file });
+		setPreviewUrl(URL.createObjectURL(file));
 	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setLoading(true);
 		try {
-			const formattedData = {
-				...formData,
-				date: new Date(`${formData.date}T${formData.time}:00.000Z`).toISOString()
-			};
+			const formDataToSend = new FormData();
+			// Append the file using key "file"
+			if (formData.eventPoster) {
+				formDataToSend.append('file', formData.eventPoster);
+			}
+			// Compute ISO date using date and time
+			const formattedDate = new Date(`${formData.date}T${formData.time}:00.000Z`).toISOString();
+			formDataToSend.append('date', formattedDate);
+			// Append other fields except time, date, eventPoster
+			const fields = ['title', 'eventFocus', 'description', 'location', 'locationType', 'guestName', 'guestDesc'];
+			fields.forEach(key => {
+				formDataToSend.append(key, formData[key]);
+			});
 
 			if (editingEvent) {
-				await api.put(`/event/${editingEvent.id}`, formattedData);
+				await api.put(`/event/${editingEvent.id}`, formDataToSend, {
+					headers: { 'Content-Type': 'multipart/form-data' },
+				});
 			} else {
-				await api.post('/event', formattedData);
+				await api.post('/event', formDataToSend, {
+					headers: { 'Content-Type': 'multipart/form-data' },
+				});
 			}
 
 			// Reset form and file input
 			setFormData({
-				eventPoster: null,
+				eventPoster: '',
 				title: '',
 				eventFocus: '',
 				description: '',
@@ -125,10 +127,16 @@ const Dashboard = () => {
 						type="file"
 						name="eventPoster"
 						ref={fileInputRef}
-						onChange={handleChange}
+						onChange={handleFileSelect}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
+					{/* New preview image render */}
+					{previewUrl && (
+						<div className="mt-2 col-span-full">
+							<img src={previewUrl} alt="Preview" className="w-32 h-auto rounded" />
+						</div>
+					)}
 					<input
 						type="text"
 						name="title"
@@ -221,35 +229,45 @@ const Dashboard = () => {
 			<h2 className="text-xl font-bold mb-3">Events</h2>
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{events.map((event) => (
-					<div key={event.id} className="p-4 border border-gray-300 rounded">
+					<div key={event.id} className="p-4 border border-gray-300 rounded group hover:border-b-4 active:border-b-4 hover:border-green-500 active:border-green-700 transition-all">
 						<h3 className="text-lg font-bold">{event.title}</h3>
-						{/* Use the PosterImage component to render the poster */}
 						{event.eventPoster && (
-								<img
-									src={event.eventPoster}
-									alt={event.title}
-									className="w-full h-auto mb-2 rounded"
-								/>
+							<PosterImage
+								src={event.eventPoster}
+								alt={event.title}
+								className="w-full h-auto mb-2 rounded"
+							/>
 						)}
-						<p>{event.description}</p>
-						<p>
+						{/* Update each field with active and hover bottom border */}
+						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
+							{event.description}
+						</p>
+						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
 							{new Date(event.date).toLocaleDateString()}{' '}
 							{new Date(event.date).toLocaleTimeString()}
 						</p>
-						<p>{event.location}</p>
-						<p>{event.locationType}</p>
-						<p>{event.guestName}</p>
-						<p>{ event.guestDesc}</p>
+						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
+							{event.location}
+						</p>
+						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
+							{event.locationType}
+						</p>
+						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
+							{event.guestName}
+						</p>
+						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
+							{event.guestDesc}
+						</p>
 						<div className="flex justify-between mt-2">
 							<button
 								onClick={() => handleEdit(event)}
-								className="p-2 bg-yellow-500 text-white rounded"
+								className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-400 active:bg-yellow-700 transition"
 							>
 								Edit
 							</button>
 							<button
 								onClick={() => handleDelete(event.id)}
-								className="p-2 bg-red-500 text-white rounded"
+								className="p-2 bg-red-500 text-white rounded hover:bg-red-400 active:bg-red-700 transition"
 							>
 								Delete
 							</button>
