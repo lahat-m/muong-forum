@@ -19,6 +19,7 @@ const LandingPage = () => {
             try {
                 const response = await api.get("/event");
                 setEvents(response.data);
+                console.log(response.data)
             } catch (error) {
                 console.error("Error fetching events", error);
             }
