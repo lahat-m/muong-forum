@@ -3,6 +3,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+
 @Injectable()
 export class EventService {
 	private readonly BASE_URL = '/uploads/'; // Change this to your actual base URL
@@ -32,9 +33,10 @@ export class EventService {
 
 	async findAll() {
 		const events = await this.prisma.event.findMany();
+		const appUrl = process.env.APP_URL || 'http://localhost:3000';
 		return events.map(event => ({
 			...event,
-			eventPoster: event.eventPoster ? `${this.BASE_URL}${event.eventPoster}` : null,
+			eventPoster: event.eventPoster ? `${appUrl}/${event.eventPoster}` : null,
 		}));
 	}
 
