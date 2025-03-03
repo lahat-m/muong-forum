@@ -32,9 +32,23 @@ model Event {
   locationType locationType
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  Participant Participant[]
 }
 
 enum locationType {
   ONLINE
   ONSITE
+}
+
+
+model Participant {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String
+  sex       String
+  eventId   Int
+
+  Event Event[]
 }

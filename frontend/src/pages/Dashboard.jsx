@@ -1,32 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import api from '../api';
 import PosterImage from '../components/PosterImage';
+import EventComponent from '../components/EventComponent'; // new import
 
 const Dashboard = () => {
-	const [events, setEvents] = useState([]);
-	const [formData, setFormData] = useState({
-		eventPoster: '',
-		title: '',
-		eventFocus: '',
-		description: '',
-		date: '',
-		time: '',
-		location: '',
-		locationType: 'ONSITE',
-		guestName: '',
-		guestDesc: ''
+	// Remove custom formData state and use react-hook-form
+	const { register, handleSubmit, reset } = useForm({
+		defaultValues: {
+			title: '',
+			eventFocus: '',
+			description: '',
+			date: '',
+			time: '',
+			location: '',
+			locationType: 'ONSITE',
+			guestName: '',
+			guestDesc: ''
+		}
 	});
+	const [previewUrl, setPreviewUrl] = useState(null);
+	const [events, setEvents] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [editingEvent, setEditingEvent] = useState(null);
-	const fileInputRef = useRef(null);
-	const [previewUrl, setPreviewUrl] = useState(null);
 
-	// Cleanup object URL
-	useEffect(() => {
-		return () => {
-			if (previewUrl) URL.revokeObjectURL(previewUrl);
-		};
-	}, [previewUrl]);
+	// ...existing useEffect for fetching events...
 	useEffect(() => {
 		fetchEvents();
 	}, []);
@@ -40,61 +38,31 @@ const Dashboard = () => {
 		}
 	};
 
-	const handleChange = (e) => {
-		const { name, value } = e.target;
-		setFormData({ ...formData, [name]: value });
-	};
-
-	const handleFileSelect = (e) => {
-		const file = e.target.files[0];
-		if (!file) return;
-		setFormData({ ...formData, eventPoster: file });
-		setPreviewUrl(URL.createObjectURL(file));
-	};
-
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const onSubmit = async (data) => {
 		setLoading(true);
 		try {
 			const formDataToSend = new FormData();
 			// Append the file using key "file"
-			if (formData.eventPoster) {
-				formDataToSend.append('file', formData.eventPoster);
+			if (data.eventPoster && data.eventPoster[0]) {
+				formDataToSend.append('file', data.eventPoster[0]);
 			}
-			// Compute ISO date using date and time
-			const formattedDate = new Date(`${formData.date}T${formData.time}:00.000Z`).toISOString();
+			const formattedDate = new Date(`${data.date}T${data.time}:00.000Z`).toISOString();
 			formDataToSend.append('date', formattedDate);
-			// Append other fields except time, date, eventPoster
-			const fields = ['title', 'eventFocus', 'description', 'location', 'locationType', 'guestName', 'guestDesc'];
-			fields.forEach(key => {
-				formDataToSend.append(key, formData[key]);
+			['title', 'eventFocus', 'description', 'location', 'locationType', 'guestName', 'guestDesc'].forEach(key => {
+				formDataToSend.append(key, data[key]);
 			});
 
 			if (editingEvent) {
 				await api.put(`/event/${editingEvent.id}`, formDataToSend, {
-					headers: { 'Content-Type': 'multipart/form-data' },
+					headers: { 'Content-Type': 'multipart/form-data' }
 				});
 			} else {
 				await api.post('/event', formDataToSend, {
-					headers: { 'Content-Type': 'multipart/form-data' },
+					headers: { 'Content-Type': 'multipart/form-data' }
 				});
 			}
-
-			// Reset form and file input
-			setFormData({
-				eventPoster: '',
-				title: '',
-				eventFocus: '',
-				description: '',
-				date: '',
-				time: '',
-				location: '',
-				locationType: 'ONSITE',
-				guestName: '',
-				guestDesc: ''
-			});
-			if (fileInputRef.current) fileInputRef.current.value = '';
-
+			reset();
+			setPreviewUrl(null);
 			setEditingEvent(null);
 			fetchEvents();
 		} catch (error) {
@@ -105,8 +73,9 @@ const Dashboard = () => {
 	};
 
 	const handleEdit = (event) => {
-		setFormData({ ...event });
 		setEditingEvent(event);
+		reset(event);
+		setPreviewUrl(event.eventPoster);
 	};
 
 	const handleDelete = async (id) => {
@@ -121,13 +90,18 @@ const Dashboard = () => {
 	return (
 		<div className="p-5">
 			<h1 className="text-2xl font-bold mb-5">Dashboard</h1>
-			<form onSubmit={handleSubmit} className="mb-5">
+			<form onSubmit={handleSubmit(onSubmit)} className="mb-5">
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<input
 						type="file"
-						name="eventPoster"
-						ref={fileInputRef}
-						onChange={handleFileSelect}
+						{...register('eventPoster', {
+							onChange: (e) => {
+								const file = e.target.files[0];
+								if (file) {
+									setPreviewUrl(URL.createObjectURL(file));
+								}
+							}
+						})}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
@@ -139,60 +113,46 @@ const Dashboard = () => {
 					)}
 					<input
 						type="text"
-						name="title"
-						value={formData.title}
-						onChange={handleChange}
 						placeholder="Event Title"
+						{...register('title', { required: true })}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
 					<input
 						type="text"
-						name="eventFocus"
-						value={formData.eventFocus}
-						onChange={handleChange}
 						placeholder="Event Focus"
+						{...register('eventFocus', { required: true })}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
 					<input
 						type="text"
-						name="description"
-						value={formData.description}
-						onChange={handleChange}
 						placeholder="Event Description"
+						{...register('description', { required: true })}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
 					<input
 						type="date"
-						name="date"
-						value={formData.date}
-						onChange={handleChange}
+						{...register('date', { required: true })}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
 					<input
 						type="time"
-						name="time"
-						value={formData.time}
-						onChange={handleChange}
+						{...register('time', { required: true })}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
 					<input
 						type="text"
-						name="location"
-						value={formData.location}
-						onChange={handleChange}
 						placeholder="Event Location"
+						{...register('location', { required: true })}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
 					<select
-						name="locationType"
-						value={formData.locationType}
-						onChange={handleChange}
+						{...register('locationType', { required: true })}
 						className="p-2 border border-gray-300 rounded"
 						required
 					>
@@ -201,63 +161,28 @@ const Dashboard = () => {
 					</select>
 					<input
 						type="text"
-						name="guestName"
-						value={formData.guestName}
-						onChange={handleChange}
 						placeholder="Guest Name"
+						{...register('guestName', { required: true })}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
 					<input
 						type="text"
-						name="guestDesc"
-						value={formData.guestDesc}
-						onChange={handleChange}
 						placeholder="Guest Desc"
+						{...register('guestDesc', { required: true })}
 						className="p-2 border border-gray-300 rounded"
 						required
 					/>
 				</div>
-				<button
-					type="submit"
-					className="mt-4 p-2 bg-blue-500 text-white rounded"
-					disabled={loading}
-				>
+				<button type="submit" className="mt-4 p-2 bg-blue-500 text-white rounded" disabled={loading}>
 					{loading ? 'Submitting...' : editingEvent ? 'Update Event' : 'Create Event'}
 				</button>
 			</form>
 			<h2 className="text-xl font-bold mb-3">Events</h2>
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{events.map((event) => (
-					<div key={event.id} className="p-4 border border-gray-300 rounded group hover:border-b-4 active:border-b-4 hover:border-green-500 active:border-green-700 transition-all">
-						<h3 className="text-lg font-bold">{event.title}</h3>
-						{event.eventPoster && (
-							<PosterImage
-								src={event.eventPoster}
-								alt={event.title}
-								className="w-full h-auto mb-2 rounded"
-							/>
-						)}
-						{/* Update each field with active and hover bottom border */}
-						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
-							{event.description}
-						</p>
-						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
-							{new Date(event.date).toLocaleDateString()}{' '}
-							{new Date(event.date).toLocaleTimeString()}
-						</p>
-						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
-							{event.location}
-						</p>
-						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
-							{event.locationType}
-						</p>
-						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
-							{event.guestName}
-						</p>
-						<p className="pb-1 border-b-2 border-transparent group-hover:border-green-500 active:border-green-700 transition-all">
-							{event.guestDesc}
-						</p>
+					<div key={event.id} className="p-4 border border-gray-300 rounded">
+						<EventComponent event={event} />
 						<div className="flex justify-between mt-2">
 							<button
 								onClick={() => handleEdit(event)}

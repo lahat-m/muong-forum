@@ -35,12 +35,15 @@ const EventComponent = ({ event, onInterest }) => {
           Bio: {event.guestDesc}
         </p>
       </div>
-      <button
-        className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-400 active:bg-green-700 transition w-full"
-        onClick={() => onInterest(event.id)}
-      >
-        Book A Spot
-      </button>
+      {/* Only render Book A Spot button if onInterest is passed */}
+      {onInterest && (
+        <button
+          className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-400 active:bg-green-700 transition w-full"
+          onClick={() => onInterest(event.id)}
+        >
+          Book A Spot
+        </button>
+      )}
     </div>
   );
 };
