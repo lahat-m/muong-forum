@@ -1,30 +1,24 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+// src/users/dto/create-user.dto.ts
+
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto {
-  
-    @IsEmail()
-    @IsNotEmpty()
-    @ApiProperty({ example: 'james@mail.com' })
-    email: string;
-  
     @IsString()
     @IsNotEmpty()
-    @ApiProperty({ example: 'james' })
-    username: string;
-  
-    @IsString()
-    @IsNotEmpty()
-    @MinLength(6)
-    @ApiProperty({ example: 'password' })
-    password: string;
-  
-    @IsString()
-    @ApiProperty({ example: 'James'})
-    firstName?: string;
-  
-    @IsString()
-    @ApiProperty({ example: 'Doe'})
-    lastName?: string;
+    firstName: string;
 
+    @IsString()
+    @IsNotEmpty()
+    lastName: string;
+
+    @IsEmail()
+    email: string;
+
+    @IsString()
+    @IsNotEmpty()
+    password: string;
+
+    @IsString()
+    @IsOptional() // Username is optional if you want to allow email-only registration
+    username?: string;
 }

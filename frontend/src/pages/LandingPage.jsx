@@ -1,25 +1,24 @@
-import React from "react";
+// frontend/pages/LandingPage.jsx
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Particles from "react-tsparticles";
 import api from "../api";
 import Loader from "../components/Loader";
 import NavBar from "../components/NavBar";
 import EventComponent from "../components/EventComponent";
-import BookSpot from "../components/BookSpot.jsx";
+import BookSpot from "../components/BookSpot";
 
 const LandingPage = () => {
-    const [events, setEvents] = React.useState([]);
-    const [showModal, setShowModal] = React.useState(false);
-    const [selectedEvent, setSelectedEvent] = React.useState(null);
-    const [uploadedImage, setUploadedImage] = React.useState(null);
+    const [events, setEvents] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
     const navigate = useNavigate();
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchEvents = async () => {
             try {
                 const response = await api.get("/event");
                 setEvents(response.data);
-                console.log(response.data)
             } catch (error) {
                 console.error("Error fetching events", error);
             }
@@ -31,15 +30,6 @@ const LandingPage = () => {
         const eventItem = events.find((event) => event.id === id);
         setSelectedEvent(eventItem);
         setShowModal(true);
-    };
-
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => setUploadedImage(reader.result);
-            reader.readAsDataURL(file);
-        }
     };
 
     return (
@@ -72,21 +62,21 @@ const LandingPage = () => {
 
             {/* Hero Section */}
             <section className="relative z-10 flex flex-col items-center justify-center text-center py-32 px-6">
-                <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-lg animate-fadeInDown">
+                <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-lg">
                     Discover Extraordinary Experiences
                 </h1>
-                <p className="mt-6 text-xl md:text-2xl text-gray-200 max-w-2xl animate-fadeInUp">
-                    Join us to explore events that inspire creativity, innovation, and community. Your next adventure is just a click away.
+                <p className="mt-6 text-xl md:text-2xl text-gray-200 max-w-2xl">
+                    Join us to explore events that inspire creativity, innovation, and community.
                 </p>
                 <button
                     className="mt-8 bg-green-500 hover:bg-green-400 text-white px-8 py-3 rounded-full text-lg transition transform hover:scale-105 shadow-lg"
-                    onClick={() => navigate('/auth')}
+                    onClick={() => navigate("/auth")}
                 >
                     Start Now
                 </button>
             </section>
 
-            {/* Features Section */}
+            {/* Events Section */}
             <section className="relative z-10 max-w-6xl mx-auto py-16 px-6 grid gap-8 md:grid-cols-3">
                 {events.length === 0 ? (
                     <div className="col-span-3 text-center">
@@ -94,18 +84,32 @@ const LandingPage = () => {
                     </div>
                 ) : (
                     events.map((event) => (
-                        <EventComponent key={event.id} event={event} onInterest={handleInterest} />
+                        <div key={event.id} className="bg-white p-4 rounded shadow-md">
+                            <EventComponent event={event} onInterest={handleInterest} />
+                            <div className="mt-2 text-sm text-gray-700">
+                                {event.registrations && event.registrations.length > 0 ? (
+                                    <span>
+                                        {event.registrations.length} Participant
+                                        {event.registrations.length > 1 ? "s" : ""}
+                                    </span>
+                                ) : (
+                                    <span>0 Participants</span>
+                                )}
+                            </div>
+                        </div>
                     ))
                 )}
             </section>
 
-            {/* Interest Modal */}
+            {/* Book Spot Modal */}
             <BookSpot
                 visible={showModal}
                 event={selectedEvent}
-                uploadedImage={uploadedImage}
-                handleImageUpload={handleImageUpload}
                 onCancel={() => setShowModal(false)}
+                onSuccess={() => {
+                    setShowModal(false);
+                    // Optionally refresh events so participant counts update
+                }}
             />
 
             {/* Footer */}
