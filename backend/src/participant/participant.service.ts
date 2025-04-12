@@ -56,7 +56,7 @@ export class ParticipantService {
     return participant;
   }
 
-  async remove(id: number) {
+  async delete(id: number) {
     try {
       const participant = await this.prisma.participant.delete({ where: { id } });
       return { status: 'success', message: 'Participant deleted successfully', participant };

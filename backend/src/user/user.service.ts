@@ -4,6 +4,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateEventDto } from 'src/event/dto/update-event.dto';
 
 const roundsOfHashing = parseInt(process.env.PASSWORD_HASH_ROUNDS || '10');
 
@@ -55,6 +56,34 @@ export class UserService {
 			return admin;
 		} catch (error) {
 			throw new BadRequestException('Admin already exists or invalid data provided');
+		}
+	}
+
+
+	async updateProfile(id: number, updateUserDto: UpdateEventDto) {
+		try {
+			const updatedUser = await this.prisma.user.update({
+				where: {
+					id
+				},
+				data: updateUserDto,
+			});
+			return updatedUser;
+		} catch (error) {
+			throw new BadRequestException('Failed to update use profile');
+		}
+	}
+
+
+	// delete current user profile
+	async deleteProfile(id: number) {
+		try {
+			const deletedUser = await this.prisma.user.delete({
+				where: { id },
+			});
+			return deletedUser;
+		} catch (error) {
+			throw new BadRequestException('Failed to delete user profile')
 		}
 	}
 }

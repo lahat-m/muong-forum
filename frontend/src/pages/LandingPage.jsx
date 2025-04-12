@@ -63,7 +63,7 @@ const LandingPage = () => {
             {/* Hero Section */}
             <section className="relative z-10 flex flex-col items-center justify-center text-center py-32 px-6">
                 <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-lg">
-                    Discover Extraordinary Experiences
+                    History . Culture . Future
                 </h1>
                 <p className="mt-6 text-xl md:text-2xl text-gray-200 max-w-2xl">
                     Join us to explore events that inspire creativity, innovation, and community.
@@ -90,7 +90,7 @@ const LandingPage = () => {
                                 {event.registrations && event.registrations.length > 0 ? (
                                     <span>
                                         {event.registrations.length} Participant
-                                        {event.registrations.length > 1 ? "s" : ""}
+                                        {event.registrations.length > 1 ? "s Attending" : ""}
                                     </span>
                                 ) : (
                                     <span>0 Participants</span>

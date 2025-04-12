@@ -43,6 +43,6 @@ export class ParticipantController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete participant by ID' })
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.participantService.remove(id);
+    return this.participantService.delete(id);
   }
 }

@@ -13,7 +13,7 @@ const PosterImage = ({ src, alt }) => (
 
 const EventComponent = ({ event, onInterest }) => {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-xl transform transition duration-300 hover:scale-105 active:scale-95 hover:shadow-2xl hover:bg-green-50 group hover:border-b-4 active:border-b-4 hover:border-green-500 active:border-green-700">
+    <div className="bg-white p-6 rounded-lg shadow-xl transform transition duration-300 hover:scale-105 active:scale-95 hover:shadow-2xl hover:bg-green-50 group hover:border-b-4 active:border-b-4">
       {event.eventPoster && (
         <PosterImage src={event.eventPoster} alt={event.title} />
       )}
@@ -41,14 +41,6 @@ const EventComponent = ({ event, onInterest }) => {
           <span className="font-semibold">Bio:</span> {event.guestDesc}
         </p>
       </div>
-      {onInterest && (
-        <button
-          onClick={() => onInterest(event.id)}
-          className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-400 active:bg-green-700 transition w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
-          Book A Spot
-        </button>
-      )}
     </div>
   );
 };
