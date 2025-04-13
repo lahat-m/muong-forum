@@ -18,7 +18,7 @@ const AuthPage = () => {
     const [signUpPassword, setSignUpPassword] = useState('');
     const [signUpUsername, setSignUpUsername] = useState('');
 
-    // Handle regular user sign-up.
+    // Handle user sign-up.
     async function handleSignUp(e) {
         e.preventDefault();
         setLoader(true);
@@ -75,6 +75,7 @@ const AuthPage = () => {
     }
 
     return (
+        
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             {loader && <Loader />}
             <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">

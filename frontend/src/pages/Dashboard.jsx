@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import EventComponent from "../components/EventComponent";
+import ParticipantsModal from "../components/ParticipantsModal";
 
 const Dashboard = () => {
 	const { register, handleSubmit, reset } = useForm({
@@ -26,8 +27,9 @@ const Dashboard = () => {
 	const [loading, setLoading] = useState(false);
 	const [editingEvent, setEditingEvent] = useState(null);
 	const [modalVisible, setModalVisible] = useState(false);
+	const [modalParticipants, setModalParticipants] = useState([]);
 	const [modalEventTitle, setModalEventTitle] = useState("");
-	const [activeTab, setActiveTab] = useState("events"); // "events" or "new-event"
+	const [activeTab, setActiveTab] = useState("event");
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -45,12 +47,15 @@ const Dashboard = () => {
 	if (!localStorage.getItem("ACCESS_TOKEN")) {
 		return (
 			<div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
-				<h2 className="text-4xl font-extrabold mb-4">Authentication Required</h2>
+				<h2 className="text-4xl font-extrabold mb-4">
+					Authentication Required
+				</h2>
 				<p className="text-lg">Redirecting to login page...</p>
 			</div>
 		);
 	}
 
+	// Fetch events from the backend.
 	const fetchEvents = async () => {
 		try {
 			const response = await api.get("/event");
@@ -60,20 +65,33 @@ const Dashboard = () => {
 		}
 	};
 
+	// Submit new or updated event.
 	const onSubmit = async (data) => {
 		setLoading(true);
 		try {
 			const formDataToSend = new FormData();
+
+			// Append the event poster file (if provided)
 			if (data.eventPoster && data.eventPoster[0]) {
-				formDataToSend.append("file", data.eventPoster[0]);
+				// Change "file" to "eventPoster" if your backend requires that field name.
+				formDataToSend.append("eventPoster", data.eventPoster[0]);
 			}
-			const formattedDate = new Date(`${data.date}T${data.time}:00.000Z`).toISOString();
+
+			// Format the date/time for ISO string
+			const formattedDate = new Date(
+				`${data.date}T${data.time}:00.000Z`
+			).toISOString();
 			formDataToSend.append("date", formattedDate);
-			["title", "eventFocus", "description", "location", "locationType", "guestName", "guestDesc"].forEach(
-				(key) => {
-					formDataToSend.append(key, data[key]);
-				}
-			);
+
+			// Append other form fields
+			["title", "eventFocus", "description", "location", "locationType", "guestName", "guestDesc"].forEach((key) => {
+				formDataToSend.append(key, data[key]);
+			});
+
+			// DEBUG: Log the FormData contents
+			for (let pair of formDataToSend.entries()) {
+				console.log(`${pair[0]}: ${pair[1]}`);
+			}
 
 			if (editingEvent) {
 				await api.put(`/event/${editingEvent.id}`, formDataToSend, {
@@ -91,6 +109,7 @@ const Dashboard = () => {
 			setActiveTab("events");
 		} catch (error) {
 			console.error("Error submitting form:", error);
+			alert("Error submitting event. Please check the console for details.");
 		} finally {
 			setLoading(false);
 		}
@@ -130,14 +149,12 @@ const Dashboard = () => {
 		try {
 			if (event.registrations) {
 				setModalParticipants(event.registrations.map((reg) => reg.participant));
-				setModalEventTitle(event.title);
-				setModalVisible(true);
 			} else {
 				const res = await api.get(`/event/${event.id}/participants`);
 				setModalParticipants(res.data);
-				setModalEventTitle(event.title);
-				setModalVisible(true);
 			}
+			setModalEventTitle(event.title);
+			setModalVisible(true);
 		} catch (error) {
 			console.error("Error fetching participants:", error);
 		}
@@ -149,7 +166,7 @@ const Dashboard = () => {
 			<nav className="bg-white/80 backdrop-filter backdrop-blur-lg shadow-md py-4 mb-8">
 				<div className="container mx-auto flex justify-between items-center px-6">
 					<h1 className="text-3xl font-bold text-gray-800">
-						<span className="text-indigo-600">Yaude</span> Events
+						<span className="text-indigo-600">Muong</span> Forum
 					</h1>
 					<button
 						onClick={handleLogout}
@@ -175,7 +192,6 @@ const Dashboard = () => {
 					<button
 						onClick={() => {
 							setActiveTab("new-event");
-							// reset form for new event if not in edit mode.
 							if (!editingEvent) reset();
 						}}
 						className={`px-6 py-3 rounded-full font-semibold transition duration-300 ${activeTab === "new-event"
@@ -300,9 +316,13 @@ const Dashboard = () => {
 
 				{activeTab === "events" && (
 					<div className="space-y-8">
-						<h2 className="text-2xl font-bold text-indigo-700 mb-4">Your Events</h2>
+						<h2 className="text-2xl font-bold text-indigo-700 mb-4 text-center">
+							Your Events
+						</h2>
 						{events.length === 0 ? (
-							<p className="text-center text-gray-600">No events available, create one to get started.</p>
+							<p className="text-center text-gray-600">
+								No events available, create one to get started.
+							</p>
 						) : (
 							<div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 								{events.map((event) => (
@@ -325,7 +345,7 @@ const Dashboard = () => {
 												Delete
 											</button>
 										</div>
-										<div className="mt-4 text-sm text-gray-700">
+										<div className="mt-4 text-sm text-gray-700 text-center">
 											{event.registrations && event.registrations.length > 0
 												? `${event.registrations.length} Participant${event.registrations.length > 1 ? "s" : ""}`
 												: "0 Participants"}
@@ -343,6 +363,14 @@ const Dashboard = () => {
 					</div>
 				)}
 			</div>
+
+			{/* Participants Modal */}
+			<ParticipantsModal
+				visible={modalVisible}
+				eventTitle={modalEventTitle}
+				participants={modalParticipants}
+				onClose={() => setModalVisible(false)}
+			/>
 		</div>
 	);
 };

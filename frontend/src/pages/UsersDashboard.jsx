@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 import EventComponent from "../components/EventComponent";
 import BookSpot from "../components/BookSpot";
+import Loader from "../components/Loader";
 
 const UserDashboard = () => {
     const navigate = useNavigate();
@@ -223,7 +224,7 @@ const UserDashboard = () => {
                     <div>
                         <h2 className="text-xl font-bold mb-4">Available Events</h2>
                         {loadingEvents ? (
-                            <p>Loading events...</p>
+                            < Loader />
                         ) : events.length === 0 ? (
                             <p>No events available at the moment. Please check back later!</p>
                         ) : (

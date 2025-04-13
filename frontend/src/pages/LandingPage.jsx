@@ -13,6 +13,8 @@ const LandingPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const navigate = useNavigate();
+    const [showBookSpot, setShowBookSpot] = useState(false);
+
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -26,11 +28,14 @@ const LandingPage = () => {
         fetchEvents();
     }, []);
 
-    const handleInterest = (id) => {
-        const eventItem = events.find((event) => event.id === id);
-        setSelectedEvent(eventItem);
-        setShowModal(true);
+
+    // When a user wants to book an event, open the BookSpot modal
+    const handleOpenBookSpot = (event) => {
+        setSelectedEvent(event);
+        setShowBookSpot(true);
     };
+
+
 
     return (
         <div className="relative min-h-screen overflow-hidden">
@@ -61,12 +66,13 @@ const LandingPage = () => {
             <NavBar />
 
             {/* Hero Section */}
-            <section className="relative z-10 flex flex-col items-center justify-center text-center py-32 px-6">
+            <section className="relative z-10 flex flex-col items-center justify-center text-center py-4 px-6">
                 <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-lg">
-                    History . Culture . Future
+                    Muong Forum
                 </h1>
                 <p className="mt-6 text-xl md:text-2xl text-gray-200 max-w-2xl">
-                    Join us to explore events that inspire creativity, innovation, and community.
+                    People . History . Culture . Future
+
                 </p>
                 <button
                     className="mt-8 bg-green-500 hover:bg-green-400 text-white px-8 py-3 rounded-full text-lg transition transform hover:scale-105 shadow-lg"
@@ -77,7 +83,7 @@ const LandingPage = () => {
             </section>
 
             {/* Events Section */}
-            <section className="relative z-10 max-w-6xl mx-auto py-16 px-6 grid gap-8 md:grid-cols-3">
+            <section className="relative z-10 max-w-6xl mx-auto py-4 px-6 grid gap-8 md:grid-cols-3">
                 {events.length === 0 ? (
                     <div className="col-span-3 text-center">
                         <Loader />
@@ -85,7 +91,17 @@ const LandingPage = () => {
                 ) : (
                     events.map((event) => (
                         <div key={event.id} className="bg-white p-4 rounded shadow-md">
-                            <EventComponent event={event} onInterest={handleInterest} />
+                            <EventComponent event={event} />
+
+                            <div className="mt-2">
+                                <button
+                                    onClick={() => handleOpenBookSpot(event)}
+                                    className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-400 transition"
+                                >
+                                    Book Event
+                                </button>
+                            </div>
+
                             <div className="mt-2 text-sm text-gray-700">
                                 {event.registrations && event.registrations.length > 0 ? (
                                     <span>
@@ -103,12 +119,13 @@ const LandingPage = () => {
 
             {/* Book Spot Modal */}
             <BookSpot
-                visible={showModal}
+                visible={showBookSpot}
                 event={selectedEvent}
-                onCancel={() => setShowModal(false)}
+                onCancel={() => setShowBookSpot(false)}
                 onSuccess={() => {
-                    setShowModal(false);
-                    // Optionally refresh events so participant counts update
+                    setShowBookSpot(false);
+                    // Refresh events so participant counts update
+                    fetchEvents();
                 }}
             />
 
@@ -117,14 +134,14 @@ const LandingPage = () => {
                 <p>
                     Contact us:{" "}
                     <a href="mailto:info@example.com" className="underline hover:text-green-300">
-                        info@example.com
+                        info@muongforum.com
                     </a>{" "}
                     | Phone:{" "}
                     <a href="tel:+1234567890" className="underline hover:text-green-300">
-                        +1 234 567 890
+                        +254 743 000 000
                     </a>
                 </p>
-                <p>&copy; 2025 John Doe. All rights reserved.</p>
+                <p>&copy; 2025 Muong Forum. All rights reserved.</p>
             </footer>
         </div>
     );
