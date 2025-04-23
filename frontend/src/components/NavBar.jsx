@@ -1,86 +1,83 @@
+// NavBar.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-// ...existing code...
+import { Menu, X } from "lucide-react";
+
 const NavBar = () => {
     const navigate = useNavigate();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <>
-            {/* Sticky logo container */}
-            <div className="w-full sticky top-0 flex justify-center items-center bg-gray-800 text-white z-50 py-4 shadow-md">
-                <img src="/logo.png" alt="Logo" className="w-16 h-16" />
-            </div>
+        <nav
+            className="
+        fixed top-0 left-0 right-0  
+        h-20                /* fixed height */
+        bg-white/70         /* semi‑opaque */
+        backdrop-blur-md    
+        border-b border-gray-200
+        shadow-sm
+        z-50
+      "
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+                {/* Logo */}
+                <Link to="/">
+                    <img src="/logo.png" alt="Logo" className="h-16 w-16" />
+                </Link>
 
-            {/* Navigation header */}
-            <nav className="w-full bg-gray-800 text-white relative">
-                <div className="flex justify-center items-center px-4 py-2">
-                    {/* Mobile menu toggle button aligned left */}
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="block md:hidden text-white focus:outline-none"
-                    >
-                        {isMenuOpen ? (
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        )}
-                    </button>
-
-                    {/* Inline navigation for medium+ screens */}
-                    <div className="hidden md:flex space-x-4">
-                        <Link to="/" className="text-lg hover:text-green-300 transition">
-                            Home
-                        </Link>
-                        <Link to="/events" className="text-lg hover:text-green-300 transition">
-                            Events
-                        </Link>
-                        <Link to="/about" className="text-lg hover:text-green-300 transition">
-                            About
-                        </Link>
-                        <Link to="/contact" className="text-lg hover:text-green-300 transition">
-                            Contact
-                        </Link>
-                        <button
-                            onClick={() => navigate('/auth')}
-                            className="text-lg hover:text-green-300 transition"
+                {/* Desktop */}
+                <div className="hidden md:flex space-x-10">
+                    {["Home", "Events", "About", "Contact"].map((label) => (
+                        <Link
+                            key={label}
+                            to={label === "Home" ? "/" : `/${label.toLowerCase()}`}
+                            className="text-green-500 font-bold hover:text-blue-300 transition"
                         >
-                            Login
-                        </button>
-                    </div>
+                            {label}
+                        </Link>
+                    ))}
+                    <button
+                        onClick={() => navigate("/auth")}
+                        className="text-green-500 font-bold hover:text-blue-300 transition"
+                    >
+                        Login
+                    </button>
                 </div>
 
-                {/* Mobile menu links visible on small screens */}
-                {isMenuOpen && (
-                    <div className="flex flex-col items-start space-y-2 px-4 pb-4 md:hidden">
-                        <Link to="/" className="text-lg hover:text-green-300 transition">
-                            Home
-                        </Link>
-                        <Link to="/events" className="text-lg hover:text-green-300 transition">
-                            Events
-                        </Link>
-                        <Link to="/about" className="text-lg hover:text-green-300 transition">
-                            About
-                        </Link>
-                        <Link to="/contact" className="text-lg hover:text-green-300 transition">
-                            Contact
-                        </Link>
-                        <button
-                            onClick={() => navigate('/auth')}
-                            className="text-lg hover:text-green-300 transition text-left"
+                {/* Mobile toggle */}
+                <div className="md:hidden">
+                    <button onClick={() => setIsOpen(!isOpen)} className="text-green-500">
+                        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Menu */}
+            {isOpen && (
+                <div className="md:hidden bg-black/80 backdrop-blur-md px-6 pb-4 pt-2 text-center">
+                    {["Home", "Events", "About", "Contact"].map((label) => (
+                        <Link
+                            key={label}
+                            to={label === "Home" ? "/" : `/${label.toLowerCase()}`}
+                            onClick={() => setIsOpen(false)}
+                            className="block text-green-500 font-bold py-2 hover:text-blue-300"
                         >
-                            Login
-                        </button>
-                    </div>
-                )}
-            </nav>
-        </>
-        // ...existing JSX...
+                            {label}
+                        </Link>
+                    ))}
+                    <button
+                        onClick={() => {
+                            navigate("/auth");
+                            setIsOpen(false);
+                        }}
+                        className="w-full text-green-500 font-bold py-2 hover:text-blue-300"
+                    >
+                        Login
+                    </button>
+                </div>
+            )}
+        </nav>
     );
 };
-// ...existing code...
+
 export default NavBar;

@@ -1,4 +1,3 @@
-// This is your Prisma schema file
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   username  String?  @unique
@@ -15,10 +19,10 @@ model User {
   firstName String?
   lastName  String?
   password  String
+  role      UserRole @default(USER)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 }
-
 model Event {
   id           Int          @id @default(autoincrement())
   eventPoster  String?
@@ -33,22 +37,33 @@ model Event {
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
 
-  Participant Participant[]
+  registrations EventRegistration[]
+}
+
+model Participant {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String
+  phone String
+  sex   String
+
+  registrations EventRegistration[]
+}
+
+model EventRegistration {
+  id               Int      @id @default(autoincrement())
+  eventId          Int
+  participantId    Int
+  registrationDate DateTime @default(now()) @map("registration_date")
+
+  // Add onDelete: Cascade to remove registrations automatically when an event is deleted.
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  participant Participant @relation(fields: [participantId], references: [id])
+
+  @@unique([eventId, participantId])
 }
 
 enum locationType {
   ONLINE
   ONSITE
-}
-
-
-model Participant {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String
-  phone     String
-  sex       String
-  eventId   Int
-
-  Event Event[]
 }

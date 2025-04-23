@@ -5,7 +5,9 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { UploadEventPoster } from 'src/decorators/file-upload.decorator';
 
 @Controller('event')
 export class EventController {
@@ -13,23 +15,8 @@ export class EventController {
 
   @ApiOperation({ summary: 'Create an event' })
   @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: 'uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const fileExtName = extname(file.originalname);
-          callback(null, `${file.fieldname}-${uniqueSuffix}${fileExtName}`);
-        },
-      }),
-    })
-  )
+  @UploadEventPoster()
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Event data with image',
-    type: CreateEventDto,
-  })
   create(@Body() createEventDto: CreateEventDto, @UploadedFile() file: Express.Multer.File) {
     if (file) {
       // Save only the filename so the service can prepend BASE_URL
@@ -51,8 +38,17 @@ export class EventController {
   }
 
   @Patch(':id')
+  @UploadEventPoster()
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update an event by ID' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateEventDto: UpdateEventDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateEventDto: UpdateEventDto
+  ) {
+    if (file) {
+      updateEventDto.eventPoster = file.filename;
+    }
     return this.eventService.update(id, updateEventDto);
   }
 

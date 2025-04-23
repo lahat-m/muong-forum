@@ -1,12 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
-
 @Injectable()
 export class EventService {
-	private readonly BASE_URL = '/uploads/'; // Change this to your actual base URL
+	private readonly BASE_URL = process.env.APP_URL || 'http://localhost:3000'; // For constructing image URLs
 
 	constructor(private readonly prisma: PrismaService) { }
 
@@ -19,6 +18,7 @@ export class EventService {
 					eventFocus: createEventDto.eventFocus,
 					description: createEventDto.description,
 					guestName: createEventDto.guestName,
+					guestDesc: createEventDto.guestDesc,
 					date: createEventDto.date,
 					location: createEventDto.location,
 					locationType: createEventDto.locationType,
@@ -32,23 +32,43 @@ export class EventService {
 	}
 
 	async findAll() {
-		const events = await this.prisma.event.findMany();
-		const appUrl = process.env.APP_URL || 'http://localhost:3000';
-		return events.map(event => ({
-			...event,
-			eventPoster: event.eventPoster ? `${appUrl}/${event.eventPoster}` : null,
-		}));
+		try {
+			// Include registrations and each registration's associated participant
+			const events = await this.prisma.event.findMany({
+				include: {
+					registrations: {
+						include: { participant: true },
+					},
+				},
+			});
+
+			return events.map((event) => ({
+				...event,
+				// Prepend the base URL to the eventPoster field if available
+				eventPoster: event.eventPoster ? `${this.BASE_URL}/uploads/${event.eventPoster}` : null,
+			}));
+		} catch (error) {
+			console.error('Error fetching events:', error);
+			throw new InternalServerErrorException("Failed to fetch events");
+		}
 	}
 
 	async findOne(id: number) {
-		const event = await this.prisma.event.findUnique({ where: { id } });
+		const event = await this.prisma.event.findUnique({
+			where: { id },
+			include: {
+				registrations: {
+					include: { participant: true },
+				},
+			},
+		});
 		if (!event) {
 			throw new NotFoundException(`Event with ID ${id} not found`);
 		}
 
 		return {
 			...event,
-			eventPoster: event.eventPoster ? `${this.BASE_URL}${event.eventPoster}` : null,
+			eventPoster: event.eventPoster ? `${this.BASE_URL}/uploads/${event.eventPoster}` : null,
 		};
 	}
 
