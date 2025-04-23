@@ -14,9 +14,7 @@ const UserDashboard = () => {
     const [loadingProfile, setLoadingProfile] = useState(false);
     const [events, setEvents] = useState([]);
     const [loadingEvents, setLoadingEvents] = useState(false);
-    // New state for showing the BookSpot modal
     const [showBookSpot, setShowBookSpot] = useState(false);
-    // State to hold the currently selected event for booking
     const [selectedEvent, setSelectedEvent] = useState(null);
 
     // React Hook Form for profile update.
@@ -71,7 +69,7 @@ const UserDashboard = () => {
         try {
             setLoadingProfile(true);
             await api.put("/user/update-profile", data);
-            fetchUserProfile(); // re-fetch to update the UI
+            fetchUserProfile();
         } catch (error) {
             console.error("Error updating profile:", error);
             alert("Error updating profile. Please try again.");

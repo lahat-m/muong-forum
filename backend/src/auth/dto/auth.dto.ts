@@ -4,7 +4,7 @@ import { IsEmail, IsString } from "class-validator";
 export class AuthDto {
 
     @IsEmail()
-    @ApiProperty({ example: 'johndoe@gmail.com', description: 'The email of the user' })
+    @ApiProperty({ example: 'test@gmail.com', description: 'The email of the user' })
     email!: string;
 
     @IsString()

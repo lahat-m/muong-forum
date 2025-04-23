@@ -13,18 +13,18 @@ const PosterImage = ({ src, alt }) => (
 
 const EventComponent = ({ event, onInterest }) => {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-xl transform transition duration-300 hover:scale-105 active:scale-95 hover:shadow-2xl hover:bg-green-50 group hover:border-b-4 active:border-b-4">
+    <div className="bg-grey p-6 rounded-lg shadow-xl transform transition duration-300 hover:scale-105 active:scale-95 hover:shadow-2xl hover:bg-green-50 group hover:border-b-4 active:border-b-4">
       {event.eventPoster && (
         <PosterImage src={event.eventPoster} alt={event.title} />
       )}
-      <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
-      <p className="text-gray-700 mb-2 border-b group-hover:border-green-500">
+      <h3 className="text-green-500 text-2xl font-bold mb-2">{event.title}</h3>
+      <p className="text-black-700 mb-2 border-b group-hover:border-green-500">
         {event.eventFocus}
       </p>
-      <p className="text-gray-600 mb-4 border-b group-hover:border-green-500">
+      <p className="text-black-600 mb-4 border-b group-hover:border-green-500">
         {event.description}
       </p>
-      <div className="text-gray-500 text-sm space-y-1">
+      <div className="text-black-500 text-sm space-y-1">
         <p className="border-b group-hover:border-green-500">
           {new Date(event.date).toLocaleDateString(undefined, {
             year: "numeric",

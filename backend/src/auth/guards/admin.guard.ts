@@ -6,7 +6,7 @@ import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@
 export class AdminGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean {
         const request = context.switchToHttp().getRequest();
-        const user = request.user; // Ensure JwtGuard populates the user.
+        const user = request.user;
         if (user && user.role === 'ADMIN') {
             return true;
         }

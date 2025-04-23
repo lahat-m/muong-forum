@@ -18,6 +18,7 @@ export class EventService {
 					eventFocus: createEventDto.eventFocus,
 					description: createEventDto.description,
 					guestName: createEventDto.guestName,
+					guestDesc: createEventDto.guestDesc,
 					date: createEventDto.date,
 					location: createEventDto.location,
 					locationType: createEventDto.locationType,

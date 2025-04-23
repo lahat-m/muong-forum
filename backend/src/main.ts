@@ -8,6 +8,10 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Startass the shutdown hooks for graceful shutdown
+  // This is important for cleaning up resources like database connections
+  app.enableShutdownHooks();
+
   // Serve static files (uploads)
   // Adjust the path so it points to the uploads folder in the project root
   app.useStaticAssets(join(process.cwd(), 'uploads'), {

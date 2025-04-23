@@ -7,8 +7,10 @@ import api from "../api";
 import EventComponent from "../components/EventComponent";
 import ParticipantsModal from "../components/ParticipantsModal";
 
+const today = new Date().toISOString().split("T")[0];
+
 const Dashboard = () => {
-	const { register, handleSubmit, reset } = useForm({
+	const { register, handleSubmit, reset, formState: { errors } } = useForm({
 		defaultValues: {
 			title: "",
 			eventFocus: "",
@@ -46,7 +48,7 @@ const Dashboard = () => {
 
 	if (!localStorage.getItem("ACCESS_TOKEN")) {
 		return (
-			<div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+			<div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-purple-500 to-green-600 text-white">
 				<h2 className="text-4xl font-extrabold mb-4">
 					Authentication Required
 				</h2>
@@ -65,36 +67,33 @@ const Dashboard = () => {
 		}
 	};
 
-	// Submit new or updated event.
+	// Submit new or update event.
 	const onSubmit = async (data) => {
 		setLoading(true);
 		try {
 			const formDataToSend = new FormData();
 
-			// Append the event poster file (if provided)
-			if (data.eventPoster && data.eventPoster[0]) {
-				// Change "file" to "eventPoster" if your backend requires that field name.
+			// Append the event poster file
+			if (data.eventPoster && data.eventPoster.length > 0) {
 				formDataToSend.append("eventPoster", data.eventPoster[0]);
 			}
 
 			// Format the date/time for ISO string
-			const formattedDate = new Date(
-				`${data.date}T${data.time}:00.000Z`
-			).toISOString();
+			const formattedDate = new Date(`${data.date}T${data.time}:00.000Z`).toISOString();
 			formDataToSend.append("date", formattedDate);
 
-			// Append other form fields
+			// Append other fields
 			["title", "eventFocus", "description", "location", "locationType", "guestName", "guestDesc"].forEach((key) => {
 				formDataToSend.append(key, data[key]);
 			});
 
-			// DEBUG: Log the FormData contents
+			// Log the FormData contents
 			for (let pair of formDataToSend.entries()) {
 				console.log(`${pair[0]}: ${pair[1]}`);
 			}
 
-			if (editingEvent) {
-				await api.put(`/event/${editingEvent.id}`, formDataToSend, {
+			if (editingEvent && editingEvent.id) {
+				await api.patch(`/event/${editingEvent.id}`, formDataToSend, {
 					headers: { "Content-Type": "multipart/form-data" },
 				});
 			} else {
@@ -166,7 +165,7 @@ const Dashboard = () => {
 			<nav className="bg-white/80 backdrop-filter backdrop-blur-lg shadow-md py-4 mb-8">
 				<div className="container mx-auto flex justify-between items-center px-6">
 					<h1 className="text-3xl font-bold text-gray-800">
-						<span className="text-indigo-600">Muong</span> Forum
+						<span className="text-green-600">Muong</span> Forum
 					</h1>
 					<button
 						onClick={handleLogout}
@@ -183,8 +182,8 @@ const Dashboard = () => {
 					<button
 						onClick={() => setActiveTab("events")}
 						className={`px-6 py-3 rounded-full font-semibold transition duration-300 ${activeTab === "events"
-							? "bg-indigo-600 text-white shadow-lg"
-							: "bg-white text-gray-800 hover:bg-indigo-100"
+							? "bg-green-600 text-white shadow-lg"
+							: "bg-white text-gray-800 hover:bg-green-100"
 							}`}
 					>
 						My Events
@@ -195,8 +194,8 @@ const Dashboard = () => {
 							if (!editingEvent) reset();
 						}}
 						className={`px-6 py-3 rounded-full font-semibold transition duration-300 ${activeTab === "new-event"
-							? "bg-indigo-600 text-white shadow-lg"
-							: "bg-white text-gray-800 hover:bg-indigo-100"
+							? "bg-green-600 text-white shadow-lg"
+							: "bg-white text-gray-800 hover:bg-green-100"
 							}`}
 					>
 						{editingEvent ? "Update Event" : "Create Event"}
@@ -208,7 +207,7 @@ const Dashboard = () => {
 			<div className="container mx-auto px-6">
 				{activeTab === "new-event" && (
 					<div className="bg-white/90 backdrop-filter backdrop-blur-lg shadow-xl rounded-lg p-6 mb-10">
-						<h2 className="text-2xl font-bold text-indigo-700 mb-4 text-center">
+						<h2 className="text-2xl font-bold text-green-700 mb-4 text-center">
 							{editingEvent ? "Update Event" : "Create New Event"}
 						</h2>
 						<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -263,17 +262,38 @@ const Dashboard = () => {
 								/>
 							</div>
 							<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-								<input
-									type="date"
-									{...register("date", { required: true })}
-									className="w-full p-2 border rounded-lg"
-								/>
-								<input
-									type="time"
-									{...register("time", { required: true })}
-									className="w-full p-2 border rounded-lg"
-								/>
+								<div>
+									<input
+										type="date"
+										min={today}
+										{...register("date", {
+											required: "Date is required",
+											validate: val =>
+												new Date(val) >= new Date(today) || "Date cannot be in the past",
+										})}
+										className="w-full p-2 border rounded-lg"
+									/>
+									{errors.date && (
+										<p className="text-sm text-red-600 mt-1">
+											{errors.date.message}
+										</p>
+									)}
+								</div>
+
+								<div>
+									<input
+										type="time"
+										{...register("time", { required: "Time is required" })}
+										className="w-full p-2 border rounded-lg"
+									/>
+									{errors.time && (
+										<p className="text-sm text-red-600 mt-1">
+											{errors.time.message}
+										</p>
+									)}
+								</div>
 							</div>
+
 							<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 								<input
 									type="text"
@@ -305,7 +325,7 @@ const Dashboard = () => {
 							</div>
 							<button
 								type="submit"
-								className="w-full py-3 mt-4 rounded-full bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition duration-300 shadow-lg"
+								className="w-full py-3 mt-7 rounded-full bg-green-600 text-white font-bold hover:bg-green-700 transition duration-300 shadow-lg"
 								disabled={loading}
 							>
 								{loading ? "Submitting..." : editingEvent ? "Update Event" : "Create Event"}
@@ -316,7 +336,7 @@ const Dashboard = () => {
 
 				{activeTab === "events" && (
 					<div className="space-y-8">
-						<h2 className="text-2xl font-bold text-indigo-700 mb-4 text-center">
+						<h2 className="text-2xl font-bold text-green-700 mb-4 text-center">
 							Your Events
 						</h2>
 						{events.length === 0 ? (
@@ -331,7 +351,7 @@ const Dashboard = () => {
 										className="bg-white/90 backdrop-filter backdrop-blur-md rounded-xl shadow-lg p-4 transform hover:-translate-y-1 transition duration-300"
 									>
 										<EventComponent event={event} onInterest={() => handleViewParticipants(event)} />
-										<div className="flex justify-between mt-4">
+										<div className="flex justify-between mt-7">
 											<button
 												onClick={() => handleEdit(event)}
 												className="px-4 py-2 bg-yellow-500 text-white rounded-full hover:bg-yellow-400 transition"
@@ -345,7 +365,7 @@ const Dashboard = () => {
 												Delete
 											</button>
 										</div>
-										<div className="mt-4 text-sm text-gray-700 text-center">
+										<div className="mt-7 text-sm text-gray-700 text-center">
 											{event.registrations && event.registrations.length > 0
 												? `${event.registrations.length} Participant${event.registrations.length > 1 ? "s" : ""}`
 												: "0 Participants"}

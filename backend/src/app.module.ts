@@ -6,6 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { EventModule } from './event/event.module';
 import { ParticipantModule } from './participant/participant.module';
+import { HealthModule } from './health/health.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { ParticipantModule } from './participant/participant.module';
     UserModule,
     EventModule,
     ParticipantModule,
+    HealthModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

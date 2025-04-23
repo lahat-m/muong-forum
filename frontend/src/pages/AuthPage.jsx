@@ -75,8 +75,22 @@ const AuthPage = () => {
     }
 
     return (
-        
+
+
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
+
+            {/* Background GIF */}
+            <div
+                className="fixed top-0 left-0 w-full h-full bg-cover bg-center z-[-2] animate-fade"
+                style={{ backgroundImage: "url('/bg.gif')" }}
+            ></div>
+
+
+            <div
+                className="fixed top-0 left-0 w-full h-full bg-cover bg-center z-[-2] animate-fade"
+                style={{ backgroundImage: "url('/bg.gif')" }}
+            ></div>
+
             {loader && <Loader />}
             <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
                 <div className="flex justify-center mb-6">
@@ -84,6 +98,7 @@ const AuthPage = () => {
                         {isSignUp ? 'Sign Up' : 'Sign In'}
                     </h2>
                 </div>
+
                 <div className="flex justify-center space-x-4 mb-6">
                     <button
                         onClick={() => setIsSignUp(false)}
