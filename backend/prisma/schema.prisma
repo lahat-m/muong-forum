@@ -12,6 +12,11 @@ enum UserRole {
   ADMIN
 }
 
+enum LocationType {
+  ONLINE
+  ONSITE
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   username  String?  @unique
@@ -19,23 +24,39 @@ model User {
   firstName String?
   lastName  String?
   password  String
+  isEmailVerified Boolean  @default(false)
+  verificationToken String? @unique
+  tokenExpiresAt DateTime?
   role      UserRole @default(USER)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  emailVerifications EmailVerification[]
 }
+
+model EmailVerification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Event {
-  id           Int          @id @default(autoincrement())
-  eventPoster  String?
-  title        String
-  eventFocus   String?
-  description  String
-  guestName    String
-  guestDesc    String?
-  date         DateTime
-  location     String
-  locationType locationType
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
+  id            Int                 @id @default(autoincrement())
+  eventPoster   String?
+  title         String
+  eventFocus    String?
+  description   String
+  guestName     String
+  guestDesc     String?
+  date          DateTime
+  location      String
+  locationType  LocationType
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
 
   registrations EventRegistration[]
 }
@@ -56,14 +77,8 @@ model EventRegistration {
   participantId    Int
   registrationDate DateTime @default(now()) @map("registration_date")
 
-  // Add onDelete: Cascade to remove registrations automatically when an event is deleted.
   event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   participant Participant @relation(fields: [participantId], references: [id])
 
   @@unique([eventId, participantId])
-}
-
-enum locationType {
-  ONLINE
-  ONSITE
 }

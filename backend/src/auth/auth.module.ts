@@ -8,20 +8,26 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshJwtStrategy } from './strategies/refesh-token.strategy';
-
+import { MailerModule } from 'src/mail/mail.module';
+import { UserModule } from 'src/user/user.module';
 @Module({
   imports: [
+    UserModule, // Add this line to import UsersModule
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_ACCESS_EXPIRATION },
     }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    MailerModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, LocalStrategy, JwtStrategy, ConfigService, RefreshJwtStrategy],
+  providers: [
+    AuthService,
+    PrismaService,
+    LocalStrategy,
+    JwtStrategy,
+    RefreshJwtStrategy,
+
+  ],
 })
 export class AuthModule { }

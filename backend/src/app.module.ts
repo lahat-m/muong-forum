@@ -7,17 +7,23 @@ import { UserModule } from './user/user.module';
 import { EventModule } from './event/event.module';
 import { ParticipantModule } from './participant/participant.module';
 import { HealthModule } from './health/health.module';
-import { MailModule } from './mail/mail.module';
+import { ConfigModule } from '@nestjs/config';
+import { MailerModule } from './mail/mail.module';
+
 
 @Module({
   imports: [
+    ConfigModule.forRoot ({
+      isGlobal: true,         // Make env variables available everywhere
+      envFilePath: ['.env'],
+    }),
     PrismaModule,
     AuthModule,
     UserModule,
     EventModule,
     ParticipantModule,
     HealthModule,
-    MailModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,9 +1,11 @@
 // src/auth/auth.service.ts
 
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { UserService } from '../user/user.service';
 
 const roundsOfHashing = parseInt(process.env.PASSWORD_HASH_ROUNDS || '10');
 
@@ -11,7 +13,9 @@ const roundsOfHashing = parseInt(process.env.PASSWORD_HASH_ROUNDS || '10');
 export class AuthService {
     constructor(
         private prisma: PrismaService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private configService: ConfigService,
+        private userService: UserService
     ) { }
 
     async validateUser(email: string, password: string) {
@@ -48,6 +52,22 @@ export class AuthService {
         throw new UnauthorizedException('Invalid credentials');
     }
 
+    // email verification logic
+    async verifyEmail(token: string): Promise<void> {
+        const user = await this.userService.findByVerificationToken(token);
+        
+        if (!user) throw new NotFoundException('Invalid token');
+        if (user.tokenExpiresAt < new Date()) throw new BadRequestException('Token expired');
+        
+        await this.userService.update(user.id, {
+            isEmailVerified: true,
+            verificationToken: null,
+            tokenExpiresAt: null,
+        });
+    }
+
+
+    
     async refresh(refreshToken: string) {
         let payload;
         try {
