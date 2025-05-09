@@ -1,7 +1,7 @@
 // src/pages/AuthPage.jsx
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Loader from '../components/Loader';
 import api from '../api';
 import Notify from '../components/Notify';
@@ -9,6 +9,7 @@ import Notify from '../components/Notify';
 const AuthPage = () => {
     const [isSignUp, setIsSignUp] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const [loader, setLoader] = useState(false);
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
@@ -17,35 +18,67 @@ const AuthPage = () => {
     const [signUpEmail, setSignUpEmail] = useState('');
     const [signUpPassword, setSignUpPassword] = useState('');
     const [signUpUsername, setSignUpUsername] = useState('');
+    const [isDevelopment] = useState(
+        window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    );
 
-    // Handle user sign-up.
+    // Check URL parameters for verification or reset status
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (params.get('verified') === 'true') {
+            Notify.success('Email verified successfully. You can now log in.');
+        }
+        if (params.get('reset') === 'success') {
+            Notify.success('Password reset successful. Please log in with your new password.');
+        }
+    }, [location]);
+
+    // Handle user sign-up
     async function handleSignUp(e) {
         e.preventDefault();
         setLoader(true);
         try {
-            await api.post('/user/create-user', {
+            // Fix the endpoint to match your backend
+            const response = await api.post('/create/user', {
                 firstName: signUpFirstName,
                 lastName: signUpLastName,
                 email: signUpEmail,
                 password: signUpPassword,
                 username: signUpUsername,
             });
+
+            // Show success messages
             Notify.success('Account Created Successfully');
-            Notify.info('Please log in to continue');
+            Notify.info('Please check your email to verify your account');
+
+            // In development mode, show the verification token if available
+            if (isDevelopment && response.data?.verificationToken) {
+                Notify.info(`Dev mode: Your verification token is ${response.data.verificationToken}`);
+            }
+
+            // Reset the signup form and switch to login form
             setIsSignUp(false);
             setSignUpFirstName('');
             setSignUpLastName('');
             setSignUpEmail('');
             setSignUpPassword('');
             setSignUpUsername('');
+            
+            // Pre-fill login email for convenience
+            setLoginEmail(signUpEmail);
         } catch (error) {
-            Notify.error(error.response?.data?.message || 'An error occurred');
+            // Handle error responses
+            const errorMessage = error.response?.data?.message || 'An error occurred';
+            Notify.error(errorMessage);
+            
+            // Don't switch to login page on error
+            // Stay on signup form so user can fix issues
         } finally {
             setLoader(false);
         }
     }
 
-    // Handle login and redirect based on role.
+    // Handle user login
     async function handleSignIn(e) {
         e.preventDefault();
         setLoader(true);
@@ -54,38 +87,49 @@ const AuthPage = () => {
                 email: loginEmail,
                 password: loginPassword,
             });
-            Notify.success('Login Successful');
+
+            // Store authentication data
             localStorage.setItem('ACCESS_TOKEN', res.data.accessToken);
             localStorage.setItem('REFRESH_TOKEN', res.data.refreshToken);
             localStorage.setItem('USER', JSON.stringify(res.data.user));
-            // Role-based redirection:
+
+            // Get user info for personalized greeting
             const user = res.data.user;
+            Notify.success(`Login Successful! Welcome ${user.firstName || user.username || ''}`);
+
+            // Redirect based on user role
             setTimeout(() => {
                 if (user.role === 'ADMIN') {
                     navigate('/dashboard');
                 } else {
+                    // Ensure this route exists in your application
                     navigate('/users/dashboard');
                 }
             }, 1000);
         } catch (error) {
-            Notify.error('Invalid Credentials');
+            // Handle login errors with specific messages
+            const message = error.response?.data?.message || 'Invalid Credentials';
+            
+            if (message.includes('not verified')) {
+                Notify.error('Email not verified. Please check your inbox for the verification link.');
+                
+                if (isDevelopment) {
+                    Notify.info('Dev mode: Use the verification endpoints to verify your email');
+                }
+            } else {
+                Notify.error(message);
+            }
+            
+            // Clear password field on error but keep email for convenience
+            setLoginPassword('');
         } finally {
             setLoader(false);
         }
     }
 
     return (
-
-
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
-
             {/* Background GIF */}
-            <div
-                className="fixed top-0 left-0 w-full h-full bg-cover bg-center z-[-2] animate-fade"
-                style={{ backgroundImage: "url('/bg.gif')" }}
-            ></div>
-
-
             <div
                 className="fixed top-0 left-0 w-full h-full bg-cover bg-center z-[-2] animate-fade"
                 style={{ backgroundImage: "url('/bg.gif')" }}
@@ -102,19 +146,20 @@ const AuthPage = () => {
                 <div className="flex justify-center space-x-4 mb-6">
                     <button
                         onClick={() => setIsSignUp(false)}
-                        className={`px-4 py-2 w-1/2 rounded-lg ${!isSignUp ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
-                            }`}
+                        className={`px-4 py-2 w-1/2 rounded-lg ${!isSignUp ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                        type="button"
                     >
                         Sign In
                     </button>
                     <button
                         onClick={() => setIsSignUp(true)}
-                        className={`px-4 py-2 w-1/2 rounded-lg ${isSignUp ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
-                            }`}
+                        className={`px-4 py-2 w-1/2 rounded-lg ${isSignUp ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                        type="button"
                     >
                         Sign Up
                     </button>
                 </div>
+
                 {isSignUp ? (
                     <form onSubmit={handleSignUp}>
                         <div className="mb-4">
@@ -126,6 +171,7 @@ const AuthPage = () => {
                                 placeholder="Enter your first name"
                                 className="w-full px-4 py-2 border rounded-lg text-sm"
                                 required
+                                value={signUpFirstName}
                                 onChange={(e) => setSignUpFirstName(e.target.value)}
                             />
                         </div>
@@ -138,6 +184,7 @@ const AuthPage = () => {
                                 placeholder="Enter your last name"
                                 className="w-full px-4 py-2 border rounded-lg text-sm"
                                 required
+                                value={signUpLastName}
                                 onChange={(e) => setSignUpLastName(e.target.value)}
                             />
                         </div>
@@ -150,6 +197,7 @@ const AuthPage = () => {
                                 placeholder="Enter your email"
                                 className="w-full px-4 py-2 border rounded-lg text-sm"
                                 required
+                                value={signUpEmail}
                                 onChange={(e) => setSignUpEmail(e.target.value)}
                             />
                         </div>
@@ -162,6 +210,7 @@ const AuthPage = () => {
                                 placeholder="Enter your Username"
                                 className="w-full px-4 py-2 border rounded-lg text-sm"
                                 required
+                                value={signUpUsername}
                                 onChange={(e) => setSignUpUsername(e.target.value)}
                             />
                         </div>
@@ -174,8 +223,13 @@ const AuthPage = () => {
                                 placeholder="Create a password"
                                 className="w-full px-4 py-2 border rounded-lg text-sm"
                                 required
+                                minLength={8}
+                                value={signUpPassword}
                                 onChange={(e) => setSignUpPassword(e.target.value)}
                             />
+                            <p className="mt-1 text-xs text-gray-500">
+                                Password must be at least 8 characters long
+                            </p>
                         </div>
                         <button
                             className="w-full py-2 mt-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
@@ -201,6 +255,7 @@ const AuthPage = () => {
                                 placeholder="Enter your email"
                                 className="w-full px-4 py-2 border rounded-lg text-sm"
                                 required
+                                value={loginEmail}
                                 onChange={(e) => setLoginEmail(e.target.value)}
                             />
                         </div>
@@ -213,6 +268,7 @@ const AuthPage = () => {
                                 placeholder="Enter your password"
                                 className="w-full px-4 py-2 border rounded-lg text-sm"
                                 required
+                                value={loginPassword}
                                 onChange={(e) => setLoginPassword(e.target.value)}
                             />
                         </div>
@@ -221,9 +277,9 @@ const AuthPage = () => {
                                 <input type="checkbox" className="mr-2" />
                                 Remember me
                             </label>
-                            <a href="#" className="text-sm text-blue-500 hover:underline">
+                            <Link to="/forgot-password" className="text-sm text-blue-500 hover:underline">
                                 Forgot password?
-                            </a>
+                            </Link>
                         </div>
                         <button
                             className="w-full py-2 mt-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
@@ -232,6 +288,21 @@ const AuthPage = () => {
                             Sign In
                         </button>
                     </form>
+                )}
+
+                {/* Development Mode Helper */}
+                {isDevelopment && (
+                    <div className="mt-6 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <h3 className="text-sm font-medium text-yellow-800">Development Mode</h3>
+                        <p className="text-xs text-yellow-700 mt-1">
+                            Email verification is enabled. For development purposes:
+                        </p>
+                        <ul className="list-disc list-inside text-xs text-yellow-700 mt-1">
+                            <li>Check server logs for verification tokens</li>
+                            <li>Use <code>/auth/dev-verify</code> API endpoint with the token</li>
+                            <li>Admin users can bypass email verification</li>
+                        </ul>
+                    </div>
                 )}
             </div>
         </div>
