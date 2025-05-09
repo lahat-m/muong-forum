@@ -18,20 +18,21 @@ enum LocationType {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String?  @unique
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  password  String
-  isEmailVerified Boolean  @default(false)
-  verificationToken String? @unique
-  tokenExpiresAt DateTime?
-  role      UserRole @default(USER)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                 Int                 @id @default(autoincrement())
+  username           String?             @unique
+  email              String              @unique
+  firstName          String?
+  lastName           String?
+  password           String
+  isEmailVerified    Boolean             @default(false)
+  verificationToken  String?             @unique
+  tokenExpiresAt     DateTime?
+  role               UserRole            @default(USER)
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
 
   emailVerifications EmailVerification[]
+  passwordResetTokens PasswordResetToken[] // New relation
 }
 
 model EmailVerification {
@@ -42,6 +43,21 @@ model EmailVerification {
   createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// New model for password reset functionality
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      // Changed to Int to match User id type
+  tokenHash String   
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  usedAt    DateTime?
+
+  @@index([userId])
+  @@index([tokenHash])
 }
 
 model Event {
@@ -81,4 +97,18 @@ model EventRegistration {
   participant Participant @relation(fields: [participantId], references: [id])
 
   @@unique([eventId, participantId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  userId    String?
+  ipAddress String?
+  userAgent String?
+  metaData  Json?
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([userId])
+  @@index([createdAt])
 }

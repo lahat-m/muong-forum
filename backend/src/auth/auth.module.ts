@@ -1,33 +1,60 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
+// src/auth/auth.module.ts
 
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthController } from './auth.controller';
+import { PrismaModule } from '../prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserModule } from '../user/user.module';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { PassportModule } from '@nestjs/passport';
+import { MailerModule } from '../mail/mail.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { RefreshJwtStrategy } from './strategies/refesh-token.strategy';
-import { MailerModule } from 'src/mail/mail.module';
-import { UserModule } from 'src/user/user.module';
+
 @Module({
   imports: [
-    UserModule, // Add this line to import UsersModule
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_ACCESS_EXPIRATION },
+    PrismaModule,
+    UserModule,
+    MailerModule,
+    PassportModule,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: config.get<number>('THROTTLE_TTL', 60),
+            limit: config.get<number>('THROTTLE_LIMIT', 5),
+          },
+        ],
+      }),
     }),
-    MailerModule
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_ACCESS_EXPIRATION', '15m'),
+        },
+      }),
+    }),
+  ],
+  providers: [
+    AuthService, 
+    LocalStrategy, 
+    JwtStrategy, 
+    RefreshJwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    PrismaService,
-    LocalStrategy,
-    JwtStrategy,
-    RefreshJwtStrategy,
-
-  ],
+  exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}
