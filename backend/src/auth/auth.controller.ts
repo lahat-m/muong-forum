@@ -30,6 +30,19 @@ export class AuthController {
         return { message: "Email successfully verified" };
     }
 
+
+    // src/auth/auth.controller.ts
+// Add this endpoint
+
+    @Post('resend-verification')
+    @ApiOperation({ summary: 'Resend verification email' })
+    @ApiResponse({ status: 200, description: 'Verification email sent' })
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    async resendVerification(@Body() dto: { email: string }) {
+        await this.authService.resendVerificationEmail(dto.email);
+        return { message: 'If your email is registered, a new verification link has been sent' };
+    }
+
     @Post('refresh')
     @ApiOperation({ summary: 'Refresh access token' })
     @UseGuards(AuthGuard('refresh'))
@@ -44,7 +57,6 @@ export class AuthController {
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async forgotPassword(@Body() dto: RequestPasswordResetDto) {
         await this.authService.requestPasswordReset(dto.email);
-        // Don't reveal if email exists in system for security
         return { 
             message: 'If your email is registered, you will receive instructions to reset your password.'
         };
