@@ -37,7 +37,7 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
     
-        if (!user.isEmailVerified) {
+        if (!user.isEmailVerified && user.role !== 'ADMIN') {
             throw new UnauthorizedException('Email not verified. Please check your email for verification instructions.');
         }
     
@@ -46,16 +46,7 @@ export class AuthService {
             user: userWithoutPassword,
             accessToken: this.jwtService.sign({
                 sub: user.id,
-                email: user.email,
-                role: user.role,
-                type: 'access'
-            }),
-            refreshToken: this.jwtService.sign(
-                {
-                    sub: user.id,
-                    email: user.email,
-                    role: user.role,
-                    type: 'refresh'
+                email: user.email,git
                 },
                 { expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION') }
             )
@@ -239,4 +230,56 @@ export class AuthService {
             })
         };
     }
+
+
+    async resendVerificationEmail(email: string): Promise<void> {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { email },
+            });
+            
+            if (!user) {
+                // Silently return to prevent email enumeration
+                return;
+            }
+            
+            // If user is already verified, no need to send another email
+            if (user.isEmailVerified) {
+                return;
+            }
+            
+            // Delete any existing verification records
+            await this.prisma.emailVerification.deleteMany({
+                where: { userId: user.id }
+            });
+            
+            // Generate new verification token
+            const token = uuidv4();
+            const expiresAt = new Date();
+            expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour expiry
+            
+            // Create new verification record
+            await this.prisma.emailVerification.create({
+                data: {
+                    userId: user.id,
+                    token,
+                    expiresAt
+                }
+            });
+            
+            // Send verification email
+            await this.mailerService.sendVerificationEmail(user.email, token);
+            
+            // Log the action
+            await this.prisma.auditLog.create({
+                data: {
+                    action: 'VERIFICATION_EMAIL_RESENT',
+                    userId: user.id.toString(),
+                    metaData: { email: user.email }
+                }
+            });
+        } catch (error) {
+            console.error('Failed to resend verification email:', error);
+        }
+}
 }
