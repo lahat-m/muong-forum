@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
 import { MailerService } from '../mail/mail.service';
 import { v4 as uuidv4 } from 'uuid';
-import { RequestPasswordResetDto, ResetPasswordDto } from './dto/password-reset.dto';
 
 const roundsOfHashing = parseInt(process.env.PASSWORD_HASH_ROUNDS || '10');
 
@@ -55,7 +54,6 @@ export class AuthService {
 
     // Email verification logic
     async verifyEmail(token: string): Promise<void> {
-        // Find the email verification record
         const verification = await this.prisma.emailVerification.findUnique({
             where: { token },
             include: { user: true }

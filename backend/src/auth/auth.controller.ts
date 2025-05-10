@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Post, Query, Req, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UseGuards, UsePipes } from '@nestjs/common';
 import { AuthDto, RefreshDto } from './dto/auth.dto';
 import { RequestPasswordResetDto, ResetPasswordDto } from './dto/password-reset.dto';
 import { AuthService } from './auth.service';
@@ -30,9 +30,6 @@ export class AuthController {
         return { message: "Email successfully verified" };
     }
 
-
-    // src/auth/auth.controller.ts
-// Add this endpoint
 
     @Post('resend-verification')
     @ApiOperation({ summary: 'Resend verification email' })

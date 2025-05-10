@@ -8,9 +8,7 @@ import {
     ArrowUpRight, TrendingUp, CalendarDays, Flame, X, ChevronLeft, ChevronDown
 } from "lucide-react";
 import api from "../api";
-import Loader from "../components/Loader";
 import NavBar from "../components/NavBar";
-import EventComponent from "../components/EventComponent";
 import BookSpot from "../components/BookSpot";
 
 const LandingPage = () => {
@@ -267,9 +265,6 @@ const LandingPage = () => {
                             <span className="absolute -inset-px bg-gradient-to-r from-green-400 to-blue-400 rounded-full blur opacity-30 group-hover:opacity-100 transition-all duration-300"></span>
                             <span className="relative text-white font-bold text-lg flex items-center">
                                 Start Your Journey
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
                             </span>
                         </button>
 

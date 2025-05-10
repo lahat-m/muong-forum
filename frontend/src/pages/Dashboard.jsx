@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Users, Edit, Trash2, LogOut, Plus, Image, User, MapPin, Clock, Coffee, Video } from "lucide-react";
 import api from "../api";
-import EventComponent from "../components/EventComponent";
 import ParticipantsModal from "../components/ParticipantsModal";
 import Loader from "../components/Loader";
 import Notify from "../components/Notify";
