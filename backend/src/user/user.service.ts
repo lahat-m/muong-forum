@@ -33,7 +33,6 @@ export class UserService {
         return user;
     }
 
-// src/users/users.service.ts (partial update for createUser method)
 
 async createUser(createUserDto: CreateUserDto) {
   // Validate email format

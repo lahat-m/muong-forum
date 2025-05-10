@@ -14,6 +14,7 @@ const UserDashboard = () => {
     const [activeTab, setActiveTab] = useState("profile");
     const [userProfile, setUserProfile] = useState(null);
     const [loadingProfile, setLoadingProfile] = useState(false);
+    const [updatingProfile, setUpdatingProfile] = useState(false);
     const [events, setEvents] = useState([]);
     const [loadingEvents, setLoadingEvents] = useState(false);
     const [showBookSpot, setShowBookSpot] = useState(false);
@@ -28,7 +29,7 @@ const UserDashboard = () => {
         handleSubmit: handleSubmitProfile,
         reset: resetProfile,
         formState: { errors }
-    } = useForm({ defaultValues: { firstName: "", lastName: "", email: "" } });
+    } = useForm();
 
     // Check authentication on component mount
     useEffect(() => {
@@ -47,14 +48,18 @@ const UserDashboard = () => {
     const fetchUserProfileData = async () => {
         try {
             setLoadingProfile(true);
-            const res = await api.get("/user/profile");
+            const res = await api.get("/profile");
             setUserProfile(res.data);
+            
+            // Reset form with current user data
             resetProfile({
                 firstName: res.data.firstName || "",
                 lastName: res.data.lastName || "",
                 email: res.data.email || "",
                 username: res.data.username || "",
             });
+            
+            console.log("Profile data fetched:", res.data);
         } catch (error) {
             console.error("Error fetching profile:", error);
             if (error.response && error.response.status === 401) {
@@ -83,15 +88,36 @@ const UserDashboard = () => {
     // Update user profile
     const onUpdateProfile = async (data) => {
         try {
-            setLoadingProfile(true);
-            await api.patch("/user/update-profile", data);
+            console.log("Updating profile with data:", data);
+            setUpdatingProfile(true);
+            
+            // Ensure we're only sending fields that can be updated
+            const updateData = {
+                firstName: data.firstName,
+                lastName: data.lastName
+            };
+            
+            const response = await api.patch("/user/update-profile", updateData);
+            console.log("Profile update response:", response.data);
+            
+            // Update localStorage with new user info
+            const userInfo = JSON.parse(localStorage.getItem("USER") || "{}");
+            const updatedUserInfo = {
+                ...userInfo,
+                firstName: data.firstName,
+                lastName: data.lastName
+            };
+            localStorage.setItem("USER", JSON.stringify(updatedUserInfo));
+            
             Notify.success("Profile updated successfully!");
+            
+            // Refresh user profile data
             fetchUserProfileData();
         } catch (error) {
             console.error("Error updating profile:", error);
-            Notify.error("Failed to update profile. Please try again.");
+            Notify.error(error.response?.data?.message || "Failed to update profile. Please try again.");
         } finally {
-            setLoadingProfile(false);
+            setUpdatingProfile(false);
         }
     };
 
@@ -186,6 +212,7 @@ const UserDashboard = () => {
                             <button
                                 onClick={handleLogout}
                                 className="flex items-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+                                type="button"
                             >
                                 <LogOut size={18} className="mr-2" />
                                 Logout
@@ -206,6 +233,7 @@ const UserDashboard = () => {
                                 ? "bg-green-600 text-white" 
                                 : "hover:bg-gray-100"
                         }`}
+                        type="button"
                     >
                         <User size={18} className="mr-2" />
                         My Profile
@@ -217,6 +245,7 @@ const UserDashboard = () => {
                                 ? "bg-green-600 text-white" 
                                 : "hover:bg-gray-100"
                         }`}
+                        type="button"
                     >
                         <Calendar size={18} className="mr-2" />
                         Available Events
@@ -228,6 +257,7 @@ const UserDashboard = () => {
                                 ? "bg-green-600 text-white" 
                                 : "hover:bg-gray-100"
                         }`}
+                        type="button"
                     >
                         <UserCheck size={18} className="mr-2" />
                         My Registrations
@@ -316,10 +346,20 @@ const UserDashboard = () => {
                                     <div className="flex flex-col sm:flex-row gap-4">
                                         <button
                                             type="submit"
+                                            disabled={updatingProfile}
                                             className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition flex items-center justify-center"
                                         >
-                                            <Edit2 size={18} className="mr-2" />
-                                            Update Profile
+                                            {updatingProfile ? (
+                                                <>
+                                                    <Loader size="sm" className="mr-2" />
+                                                    Updating...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Edit2 size={18} className="mr-2" />
+                                                    Update Profile
+                                                </>
+                                            )}
                                         </button>
                                         <button
                                             type="button"
@@ -384,6 +424,7 @@ const UserDashboard = () => {
                                                     </div>
                                                     
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleOpenBookSpot(event)}
                                                         className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                                                     >
@@ -422,6 +463,7 @@ const UserDashboard = () => {
                                         You haven't registered for any events yet.
                                     </p>
                                     <button
+                                        type="button"
                                         onClick={() => setActiveTab("events")}
                                         className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                                     >

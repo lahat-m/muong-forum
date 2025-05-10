@@ -22,6 +22,21 @@ const AuthPage = () => {
         window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     );
 
+    // Check if already logged in
+    useEffect(() => {
+        const token = localStorage.getItem('ACCESS_TOKEN');
+        const user = JSON.parse(localStorage.getItem('USER') || '{}');
+        
+        if (token) {
+            // If already logged in, redirect based on role
+            if (user.role === 'ADMIN') {
+                navigate('/dashboard', { replace: true });
+            } else {
+                navigate('/users/dashboard', { replace: true });
+            }
+        }
+    }, [navigate]);
+
     // Check URL parameters for verification or reset status
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -39,7 +54,7 @@ const AuthPage = () => {
         setLoader(true);
         try {
             // Fix the endpoint to match your backend
-            const response = await api.post('/create/user', {
+            const response = await api.post('/user/create-user', {
                 firstName: signUpFirstName,
                 lastName: signUpLastName,
                 email: signUpEmail,
@@ -82,6 +97,7 @@ const AuthPage = () => {
     async function handleSignIn(e) {
         e.preventDefault();
         setLoader(true);
+        
         try {
             const res = await api.post('/auth/login', {
                 email: loginEmail,
@@ -97,16 +113,19 @@ const AuthPage = () => {
             const user = res.data.user;
             Notify.success(`Login Successful! Welcome ${user.firstName || user.username || ''}`);
 
+            console.log("Login successful, user role:", user.role);
+            
             // Redirect based on user role
-            setTimeout(() => {
-                if (user.role === 'ADMIN') {
-                    navigate('/dashboard');
-                } else {
-                    // Ensure this route exists in your application
-                    navigate('/users/dashboard');
-                }
-            }, 1000);
+            if (user.role === 'ADMIN') {
+                console.log("Redirecting to admin dashboard");
+                navigate('/dashboard', { replace: true });
+            } else {
+                console.log("Redirecting to user dashboard");
+                navigate('/users/dashboard', { replace: true });
+            }
         } catch (error) {
+            console.error("Login error:", error);
+            
             // Handle login errors with specific messages
             const message = error.response?.data?.message || 'Invalid Credentials';
             

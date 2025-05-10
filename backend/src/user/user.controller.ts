@@ -8,8 +8,8 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { UpdateEventDto } from 'src/event/dto/update-event.dto';
 
-@Controller('create')
-@ApiTags('create')
+@Controller('user')
+@ApiTags('user')
 export class UserController {
 	constructor(private readonly userService: UserService) { }
 
@@ -29,7 +29,7 @@ export class UserController {
 	}
 
 	// Public endpoint for creating a regular user.
-	@Post('user')
+	@Post('create-user')
 	@ApiOperation({ summary: 'Create a new user' })
 	@ApiBody({ type: CreateUserDto })
 	@ApiResponse({ status: 201, description: 'User created' })
@@ -38,7 +38,7 @@ export class UserController {
 	}
 
 	// Protected endpoint for creating an admin user.
-	@Post('admin')
+	@Post('create-admin')
 	@UseGuards(JwtGuard, AdminGuard)
 	@ApiOperation({ summary: 'Create an admin user' })
 	@ApiBody({ type: CreateUserDto })
