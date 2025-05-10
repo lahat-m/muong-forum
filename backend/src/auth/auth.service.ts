@@ -46,7 +46,7 @@ export class AuthService {
             user: userWithoutPassword,
             accessToken: this.jwtService.sign({
                 sub: user.id,
-                email: user.email,git
+                email: user.email
                 },
                 { expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION') }
             )
