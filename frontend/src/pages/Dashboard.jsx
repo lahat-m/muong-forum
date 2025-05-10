@@ -13,7 +13,7 @@ import Notify from "../components/Notify";
 const today = new Date().toISOString().split("T")[0];
 
 const Dashboard = () => {
-    const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    const { register, handleSubmit, reset, watch, formState: { errors } } = useForm({
         defaultValues: {
             title: "",
             eventFocus: "",
@@ -163,6 +163,17 @@ const Dashboard = () => {
         }
     };
 
+    // Handle switching to new event form
+    const handleSwitchToNewEvent = (e) => {
+        // Prevent default form submission
+        if (e) e.preventDefault();
+        
+        setActiveTab("new-event");
+        setEditingEvent(null);
+        reset();
+        setPreviewUrl(null);
+    };
+
     // If not authenticated yet
     if (!isAuthenticated) {
         return (
@@ -222,6 +233,7 @@ const Dashboard = () => {
                 {/* Dashboard Navigation Tabs */}
                 <div className="flex flex-wrap mb-8 bg-white shadow rounded-lg p-1">
                     <button
+                        type="button" 
                         onClick={() => setActiveTab("events")}
                         className={`flex items-center px-4 py-3 rounded-lg mr-2 transition ${
                             activeTab === "events" 
@@ -233,13 +245,8 @@ const Dashboard = () => {
                         All Events
                     </button>
                     <button
-                        onClick={() => {
-                            setActiveTab("new-event");
-                            if (!editingEvent) {
-                                reset();
-                                setPreviewUrl(null);
-                            }
-                        }}
+                        type="button"
+                        onClick={handleSwitchToNewEvent}
                         className={`flex items-center px-4 py-3 rounded-lg transition ${
                             activeTab === "new-event" 
                                 ? "bg-green-700 text-white" 
@@ -546,12 +553,8 @@ const Dashboard = () => {
                                 All Events
                             </h2>
                             <button
-                                onClick={() => {
-                                    setActiveTab("new-event");
-                                    setEditingEvent(null);
-                                    reset();
-                                    setPreviewUrl(null);
-                                }}
+                                type="button"
+                                onClick={handleSwitchToNewEvent}
                                 className="px-4 py-2 bg-white text-green-700 rounded-lg hover:bg-green-50 transition flex items-center"
                             >
                                 <Plus size={18} className="mr-1" />
@@ -572,11 +575,8 @@ const Dashboard = () => {
                                         Get started by creating your first event!
                                     </p>
                                     <button
-                                        onClick={() => {
-                                            setActiveTab("new-event");
-                                            setEditingEvent(null);
-                                            reset();
-                                        }}
+                                        type="button"
+                                        onClick={handleSwitchToNewEvent}
                                         className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center mx-auto"
                                     >
                                         <Plus size={18} className="mr-2" />
@@ -628,6 +628,7 @@ const Dashboard = () => {
                                                 
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleEdit(event)}
                                                         className="flex items-center justify-center py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition"
                                                     >
@@ -635,6 +636,7 @@ const Dashboard = () => {
                                                         Edit
                                                     </button>
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleDelete(event.id)}
                                                         className="flex items-center justify-center py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
                                                     >
@@ -644,6 +646,7 @@ const Dashboard = () => {
                                                 </div>
                                                 
                                                 <button
+                                                    type="button"
                                                     onClick={() => handleViewParticipants(event)}
                                                     className="mt-3 w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center"
                                                 >
