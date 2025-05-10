@@ -246,13 +246,7 @@ const LandingPage = () => {
 
                     {/* Tagline with Rotating Words */}
                     <div className="mt-8 md:mt-12 text-xl md:text-3xl font-bold text-white overflow-hidden">
-                        <span>Celebrating </span>
-                        <span className="inline-block relative w-48 h-12 md:h-14 overflow-hidden align-bottom">
-                            <span className="absolute animate-word-rotate">People</span>
-                            <span className="absolute animate-word-rotate" style={{ animationDelay: '3s' }}>History</span>
-                            <span className="absolute animate-word-rotate" style={{ animationDelay: '6s' }}>Culture</span>
-                            <span className="absolute animate-word-rotate" style={{ animationDelay: '9s' }}>Future</span>
-                        </span>
+                        <h1><span>History . People . Culture. Future</span></h1>
                     </div>
 
                     {/* Descriptive Text */}
