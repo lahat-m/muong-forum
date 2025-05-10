@@ -222,3 +222,37 @@
 .min-h-\[90vh\] {
     min-height: 90vh;
 }
+
+
+
+/* AuthPage */
+
+/* Add these animations to your CSS file for the AuthPage */
+
+@keyframes form-switch {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-form-switch {
+    animation: form-switch 0.5s ease-out;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+}
