@@ -377,7 +377,7 @@ const BookSpot = ({ visible, event, onCancel, onSuccess }) => {
                                         <input
                                             type="text"
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
-                                            placeholder="+1 (234) 567-8901"
+                                            placeholder="+254 (743) 280-570"
                                             {...register("phone", { 
                                                 required: "Phone number is required",
                                                 pattern: {
@@ -397,7 +397,7 @@ const BookSpot = ({ visible, event, onCancel, onSuccess }) => {
                                     <div>
                                         <label className="flex items-center text-gray-700 mb-2 font-medium">
                                             <Users className="h-4 w-4 mr-2 text-green-500" />
-                                            Gender
+                                            Sex
                                         </label>
                                         <select
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
@@ -458,7 +458,6 @@ const BookSpot = ({ visible, event, onCancel, onSuccess }) => {
                                 
                                 <p className="text-gray-600 max-w-md mx-auto mb-8">
                                     You've successfully registered for <strong>{event.title}</strong>. 
-                                    Check your email for confirmation and event details.
                                 </p>
                                 
                                 <div className="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-200 max-w-md">

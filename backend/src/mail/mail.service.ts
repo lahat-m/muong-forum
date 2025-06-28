@@ -6,30 +6,30 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailerService {
-    private transporter;
+  private transporter;
 
-    constructor(private configService: ConfigService) {
-        this.transporter = nodemailer.createTransport({
-            host: configService.get('MAIL_HOST'),
-            port: configService.get('MAIL_PORT'),
-            secure: configService.get('MAIL_SECURE') === 'true',
-            auth: {
-                user: configService.get('MAIL_USER'),
-                pass: configService.get('MAIL_PASSWORD'),
-            },
-        });
-    }
+  constructor(private configService: ConfigService) {
+    this.transporter = nodemailer.createTransport({
+      host: configService.get('MAIL_HOST'),
+      port: parseInt(configService.get('MAIL_PORT')),
+      secure: configService.get('MAIL_SECURE') === 'true', // true for 465, false for other ports
+      auth: {
+        user: configService.get('MAIL_USER'),
+        pass: configService.get('MAIL_PASSWORD'),
+      },
+    });
+  }
 
-    async sendVerificationEmail(to: string, token: string): Promise<void> {
-        const baseUrl = this.configService.get('VERIFICATION_BASE_URL');
-        const verificationUrl = `${baseUrl}/auth/verify-email?token=${token}`;
+  async sendVerificationEmail(to: string, token: string): Promise<void> {
+    const baseUrl = this.configService.get('FRONTEND_URL');
+    const verificationUrl = `${baseUrl}/auth/verify-email?token=${token}`;
 
-        try {
-            await this.transporter.sendMail({
-                from: `"${this.configService.get('MAIL_FROM')}" <${this.configService.get('MAIL_FROM')}>`,
-                to,
-                subject: 'Verify Your Email',
-                html: `
+    try {
+      await this.transporter.sendMail({
+        from: `"${this.configService.get('MAIL_FROM')}" <${this.configService.get('MAIL_FROM')}>`,
+        to,
+        subject: 'Verify Your Email',
+        html: `
   <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <h2>Email Verification</h2>
     <p>Hello,</p>
@@ -49,25 +49,25 @@ export class MailerService {
     <p>Best regards,<br>The Team</p>
   </div>
 `
-            });
-        } catch (error) {
-            console.error('Email sending error:', error);
-            throw new Error(`Failed to send verification email: ${error.message}`);
-        }
+      });
+    } catch (error) {
+      console.error('Email sending error:', error);
+      throw new Error(`Failed to send verification email: ${error.message}`);
     }
+  }
 
-    /**
-     * Send password reset email
-     */
+  /**
+   * Send password reset email
+   */
 
 
-async sendPasswordResetEmail(to: string, resetUrl: string, expiryTime: number): Promise<void> {
-  try {
+  async sendPasswordResetEmail(to: string, resetUrl: string, expiryTime: number): Promise<void> {
+    try {
       await this.transporter.sendMail({
-          from: `"${this.configService.get('MAIL_FROM')}" <${this.configService.get('MAIL_FROM')}>`,
-          to,
-          subject: 'Reset Your Password',
-          html: `
+        from: `"${this.configService.get('MAIL_FROM')}" <${this.configService.get('MAIL_FROM')}>`,
+        to,
+        subject: 'Reset Your Password',
+        html: `
 <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 <div style="background-color: #f5f5f5; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
   <h1 style="margin: 0; color: #333;">Reset Your Password</h1>
@@ -90,9 +90,9 @@ async sendPasswordResetEmail(to: string, resetUrl: string, expiryTime: number): 
 </div>
           `
       });
-  } catch (error) {
+    } catch (error) {
       console.error('Email sending error:', error);
       throw new Error(`Failed to send password reset email: ${error.message}`);
+    }
   }
-}
 }

@@ -4,8 +4,8 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
     UserCheck, Mail, Key, Info, Calendar, MapPin, Clock, Users,
-    ChevronRight, Filter, Star, Sparkles, Globe, Coffee, Video,
-    ArrowUpRight, TrendingUp, CalendarDays, Flame, X, ChevronLeft, ChevronDown
+    ChevronRight, Star, Sparkles, Globe, Coffee, Video,
+    ArrowUpRight, CalendarDays, Flame, X, ChevronLeft, UserPlus, BookOpen, Landmark
 } from "lucide-react";
 import api from "../api";
 import NavBar from "../components/NavBar";
@@ -18,11 +18,11 @@ const LandingPage = () => {
     const [showBookSpot, setShowBookSpot] = useState(false);
     const [showAuthInfo, setShowAuthInfo] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState("all"); // Options: "all", "upcoming", "popular"
+    const [filter, setFilter] = useState("all");
     const [expandedEventId, setExpandedEventId] = useState(null);
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [spotlightEvent, setSpotlightEvent] = useState(null);
-    const [viewMode, setViewMode] = useState("grid"); // "grid", "carousel", "spotlight"
+    const [viewMode, setViewMode] = useState("grid");
     const [carouselIndex, setCarouselIndex] = useState(0);
     const spotlightRef = useRef(null);
     const navigate = useNavigate();
@@ -244,7 +244,7 @@ const LandingPage = () => {
 
                     {/* Tagline with Rotating Words */}
                     <div className="mt-8 md:mt-12 text-xl md:text-3xl font-bold text-white overflow-hidden">
-                        <h1><span>History . People . Culture. Future</span></h1>
+                        <h1><span>History . People . Culture</span></h1>
                     </div>
 
                     {/* Descriptive Text */}
@@ -296,7 +296,7 @@ const LandingPage = () => {
 
 
 
-            
+
             {/* Auth Information Modal */}
             {showAuthInfo && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -354,7 +354,7 @@ const LandingPage = () => {
                         </div>
 
                         <p className="text-gray-300 max-w-2xl mx-auto relative z-10 text-lg">
-                            Join our exciting events to learn, connect, and celebrate Muong culture
+                            Join our exciting events to learn and connect.
                         </p>
 
                         {/* Floating animation Sparkles */}
@@ -373,8 +373,8 @@ const LandingPage = () => {
                             <button
                                 onClick={() => setViewMode("grid")}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${viewMode === "grid"
-                                        ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-inner"
-                                        : "text-gray-200 hover:text-white"
+                                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-inner"
+                                    : "text-gray-200 hover:text-white"
                                     }`}
                             >
                                 <div className="grid grid-cols-2 gap-1 mr-2">
@@ -388,8 +388,8 @@ const LandingPage = () => {
                             <button
                                 onClick={() => setViewMode("carousel")}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${viewMode === "carousel"
-                                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-inner"
-                                        : "text-gray-200 hover:text-white"
+                                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-inner"
+                                    : "text-gray-200 hover:text-white"
                                     }`}
                             >
                                 <div className="flex items-center space-x-1 mr-2">
@@ -402,8 +402,8 @@ const LandingPage = () => {
                             <button
                                 onClick={() => setViewMode("spotlight")}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${viewMode === "spotlight"
-                                        ? "bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-inner"
-                                        : "text-gray-200 hover:text-white"
+                                    ? "bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-inner"
+                                    : "text-gray-200 hover:text-white"
                                     }`}
                             >
                                 <Star className="mr-2 h-4 w-4" />
@@ -416,8 +416,8 @@ const LandingPage = () => {
                             <button
                                 onClick={() => setFilter("all")}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${filter === "all"
-                                        ? "bg-white text-green-700 shadow-inner"
-                                        : "text-gray-200 hover:text-white"
+                                    ? "bg-white text-green-700 shadow-inner"
+                                    : "text-gray-200 hover:text-white"
                                     }`}
                             >
                                 <Globe className="mr-2 h-4 w-4" />
@@ -426,8 +426,8 @@ const LandingPage = () => {
                             <button
                                 onClick={() => setFilter("upcoming")}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${filter === "upcoming"
-                                        ? "bg-white text-blue-700 shadow-inner"
-                                        : "text-gray-200 hover:text-white"
+                                    ? "bg-white text-blue-700 shadow-inner"
+                                    : "text-gray-200 hover:text-white"
                                     }`}
                             >
                                 <CalendarDays className="mr-2 h-4 w-4" />
@@ -436,8 +436,8 @@ const LandingPage = () => {
                             <button
                                 onClick={() => setFilter("popular")}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${filter === "popular"
-                                        ? "bg-white text-amber-700 shadow-inner"
-                                        : "text-gray-200 hover:text-white"
+                                    ? "bg-white text-amber-700 shadow-inner"
+                                    : "text-gray-200 hover:text-white"
                                     }`}
                             >
                                 <Flame className="mr-2 h-4 w-4" />
@@ -494,8 +494,8 @@ const LandingPage = () => {
                                         <div
                                             key={event.id}
                                             className={`group relative rounded-2xl overflow-hidden transform transition-all duration-500 hover:scale-[1.02] ${expandedEventId === event.id
-                                                    ? "col-span-full row-span-2 md:col-span-2 md:row-span-2 z-20"
-                                                    : ""
+                                                ? "col-span-full row-span-2 md:col-span-2 md:row-span-2 z-20"
+                                                : ""
                                                 }`}
                                         >
                                             {/* Card Background with Gradient Overlay */}
@@ -520,8 +520,8 @@ const LandingPage = () => {
                                                         src={event.eventPoster}
                                                         alt={event.title}
                                                         className={`w-full h-full object-cover transition-all duration-700 ${expandedEventId === event.id
-                                                                ? "scale-100 filter brightness-50"
-                                                                : "group-hover:scale-110 group-hover:filter group-hover:brightness-75"
+                                                            ? "scale-100 filter brightness-50"
+                                                            : "group-hover:scale-110 group-hover:filter group-hover:brightness-75"
                                                             }`}
                                                     />
                                                 ) : (
@@ -533,8 +533,8 @@ const LandingPage = () => {
 
                                             {/* Event Content Overlay */}
                                             <div className={`absolute inset-0 z-20 flex flex-col justify-end p-6 transition-all duration-500 ${expandedEventId === event.id
-                                                    ? "bg-black/60 backdrop-blur-sm"
-                                                    : "bg-gradient-to-t from-black/80 via-black/40 to-transparent"
+                                                ? "bg-black/60 backdrop-blur-sm"
+                                                : "bg-gradient-to-t from-black/80 via-black/40 to-transparent"
                                                 }`}>
                                                 {/* Event Tags & Info */}
                                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -542,8 +542,8 @@ const LandingPage = () => {
                                                         {event.eventFocus}
                                                     </span>
                                                     <span className={`px-3 py-1 rounded-full text-white text-xs font-semibold ${event.locationType === 'ONLINE'
-                                                            ? 'bg-blue-500/80 backdrop-blur-sm'
-                                                            : 'bg-amber-500/80 backdrop-blur-sm'
+                                                        ? 'bg-blue-500/80 backdrop-blur-sm'
+                                                        : 'bg-amber-500/80 backdrop-blur-sm'
                                                         }`}>
                                                         {event.locationType === 'ONLINE' ? (
                                                             <div className="flex items-center">
@@ -572,16 +572,16 @@ const LandingPage = () => {
                                                 </h3>
 
                                                 <p className={`text-gray-300 mb-4 transition-all duration-300 ${expandedEventId === event.id || showFullDescription
-                                                        ? ""
-                                                        : "line-clamp-2"
+                                                    ? ""
+                                                    : "line-clamp-2"
                                                     }`}>
                                                     {event.description}
                                                 </p>
 
                                                 {/* Event Details */}
                                                 <div className={`space-y-2 mb-4 transition-all duration-300 ${expandedEventId === event.id
-                                                        ? "opacity-100"
-                                                        : "opacity-0 group-hover:opacity-100"
+                                                    ? "opacity-100"
+                                                    : "opacity-0 group-hover:opacity-100"
                                                     }`}>
                                                     <div className="flex items-center text-sm">
                                                         <Clock className="h-4 w-4 text-green-400 mr-2" />
@@ -618,8 +618,8 @@ const LandingPage = () => {
                                                 <button
                                                     onClick={() => handleOpenBookSpot(event)}
                                                     className={`w-full py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${expandedEventId === event.id
-                                                            ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
-                                                            : "bg-white/10 backdrop-blur-md text-white hover:bg-white/20"
+                                                        ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
+                                                        : "bg-white/10 backdrop-blur-md text-white hover:bg-white/20"
                                                         }`}
                                                 >
                                                     <span className="mr-2">Register Now</span>
@@ -695,8 +695,8 @@ const LandingPage = () => {
                                                                 {formatEventDate(event.date)}
                                                             </span>
                                                             <span className={`px-4 py-1 rounded-full text-white text-sm ${event.locationType === 'ONLINE'
-                                                                    ? 'bg-blue-500/60 backdrop-blur-md'
-                                                                    : 'bg-amber-500/60 backdrop-blur-md'
+                                                                ? 'bg-blue-500/60 backdrop-blur-md'
+                                                                : 'bg-amber-500/60 backdrop-blur-md'
                                                                 }`}>
                                                                 {event.locationType}
                                                             </span>
@@ -768,8 +768,8 @@ const LandingPage = () => {
                                                 key={index}
                                                 onClick={() => setCarouselIndex(index)}
                                                 className={`w-3 h-3 rounded-full transition-all duration-300 ${carouselIndex === index
-                                                        ? 'bg-green-500 w-10'
-                                                        : 'bg-gray-400 bg-opacity-30 hover:bg-opacity-50'
+                                                    ? 'bg-green-500 w-10'
+                                                    : 'bg-gray-400 bg-opacity-30 hover:bg-opacity-50'
                                                     }`}
                                                 aria-label={`Go to slide ${index + 1}`}
                                             />
@@ -855,8 +855,8 @@ const LandingPage = () => {
                                                                 <p className="text-white font-medium">
                                                                     {spotlightEvent.location}
                                                                     <span className={`ml-2 px-2 py-0.5 rounded-full text-xs uppercase ${spotlightEvent.locationType === 'ONLINE'
-                                                                            ? 'bg-blue-500/60 text-white'
-                                                                            : 'bg-amber-500/60 text-white'
+                                                                        ? 'bg-blue-500/60 text-white'
+                                                                        : 'bg-amber-500/60 text-white'
                                                                         }`}>
                                                                         {spotlightEvent.locationType}
                                                                     </span>
@@ -1037,46 +1037,89 @@ const LandingPage = () => {
                 }}
             />
 
-            {/* Authentication Links Section */}
+
+            {/* Improved Community Section with Matching Icons */}
             <section className="relative z-10 py-10 bg-green-800 bg-opacity-80 text-white">
                 <div className="max-w-6xl mx-auto px-6 text-center">
-                    <h2 className="text-3xl font-bold mb-6">Join Our Community</h2>
+                    <h2 className="text-3xl font-bold mb-6">Join Muong Forum</h2>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        <div className="p-6 rounded-lg bg-green-700 bg-opacity-50 transform transition hover:scale-105">
-                            <Mail className="h-12 w-12 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold mb-2">Create Account</h3>
-                            <p className="mb-4">Register to join our community and get access to exclusive events and content.</p>
-                            <button
-                                onClick={() => navigate("/auth")}
-                                className="px-4 py-2 bg-white text-green-700 rounded-full font-medium hover:bg-gray-100 transition"
-                            >
-                                Sign Up
-                            </button>
+                        {/* Membership Card - Using UserPlus for joining/registration */}
+                        <div className="p-6 rounded-lg bg-green-700 bg-opacity-50 transform transition hover:scale-105 relative group overflow-hidden">
+                            {/* Accent circle background */}
+                            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5 group-hover:bg-white/10 transition-all duration-500"></div>
+
+                            <div className="relative z-10">
+                                {/* Icon with glow effect */}
+                                <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-20 animate-pulse-slow"></div>
+                                    <div className="bg-white/10 backdrop-blur-sm rounded-full p-4">
+                                        <UserPlus className="h-12 w-12 text-white" />
+                                    </div>
+                                </div>
+
+                                <h3 className="text-xl font-semibold mb-2 mt-4">Join Membership</h3>
+                                <p className="mb-4">Register to join our community.</p>
+
+                                <button
+                                    onClick={() => navigate("/auth")}
+                                    className="px-6 py-2 bg-white/10 backdrop-blur-sm border border-white/30 text-white rounded-full font-medium hover:bg-white/20 transition-all"
+                                >
+                                    Sign Up
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="p-6 rounded-lg bg-green-700 bg-opacity-50 transform transition hover:scale-105">
-                            <UserCheck className="h-12 w-12 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold mb-2">Verify Email</h3>
-                            <p className="mb-4">Already registered but haven't verified your email? Check your inbox for the verification link.</p>
-                            <button
-                                onClick={() => navigate("/auth")}
-                                className="px-4 py-2 bg-white text-green-700 rounded-full font-medium hover:bg-gray-100 transition"
-                            >
-                                Sign In
-                            </button>
+                        {/* History Card - Using BookOpen for learning history */}
+                        <div className="p-6 rounded-lg bg-green-700 bg-opacity-50 transform transition hover:scale-105 relative group overflow-hidden">
+                            {/* Accent circle background */}
+                            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5 group-hover:bg-white/10 transition-all duration-500"></div>
+
+                            <div className="relative z-10">
+                                {/* Icon with glow effect */}
+                                <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full opacity-20 animate-pulse-slow"></div>
+                                    <div className="bg-white/10 backdrop-blur-sm rounded-full p-4">
+                                        <BookOpen className="h-12 w-12 text-white" />
+                                    </div>
+                                </div>
+
+                                <h3 className="text-xl font-semibold mb-2 mt-4">Learn Liberation History</h3>
+                                <p className="mb-4">Account of patriotic war of Independence.</p>
+
+                                <button
+                                    onClick={() => navigate("/history")}
+                                    className="px-6 py-2 bg-white/10 backdrop-blur-sm border border-white/30 text-white rounded-full font-medium hover:bg-white/20 transition-all"
+                                >
+                                    Explore History
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="p-6 rounded-lg bg-green-700 bg-opacity-50 transform transition hover:scale-105">
-                            <Key className="h-12 w-12 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold mb-2">Reset Password</h3>
-                            <p className="mb-4">Forgot your password? No worries, you can easily reset it through our secure system.</p>
-                            <button
-                                onClick={() => navigate("/forgot-password")}
-                                className="px-4 py-2 bg-white text-green-700 rounded-full font-medium hover:bg-gray-100 transition"
-                            >
-                                Reset Password
-                            </button>
+                        {/* Culture Card - Using UsersRound for cultural community */}
+                        <div className="p-6 rounded-lg bg-green-700 bg-opacity-50 transform transition hover:scale-105 relative group overflow-hidden">
+                            {/* Accent circle background */}
+                            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5 group-hover:bg-white/10 transition-all duration-500"></div>
+
+                            <div className="relative z-10">
+                                {/* Icon with glow effect */}
+                                <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-20 animate-pulse-slow"></div>
+                                    <div className="bg-white/10 backdrop-blur-sm rounded-full p-4">
+                                        <Landmark className="h-12 w-12 text-white" />
+                                    </div>
+                                </div>
+
+                                <h3 className="text-xl font-semibold mb-2 mt-4">Know Your Culture</h3>
+                                <p className="mb-4">Learn diverse Cultures of South Sudanese.</p>
+
+                                <button
+                                    onClick={() => navigate("/culture")}
+                                    className="px-6 py-2 bg-white/10 backdrop-blur-sm border border-white/30 text-white rounded-full font-medium hover:bg-white/20 transition-all"
+                                >
+                                    Discover Culture
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
