@@ -10,6 +10,8 @@ import { HealthModule } from './health/health.module';
 import { ConfigModule } from '@nestjs/config';
 import { MailerModule } from './mail/mail.module';
 import { TasksModule } from './tasks/tasks.module';
+import { StudentsModule } from './students/students.module';
+import { FilesModule } from './files/files.module';
 
 
 @Module({
@@ -26,6 +28,8 @@ import { TasksModule } from './tasks/tasks.module';
     HealthModule,
     MailerModule,
     TasksModule,
+    StudentsModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
