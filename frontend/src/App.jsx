@@ -6,7 +6,7 @@ import LandingPage from './pages/LandingPage'
 import UserDashboard from './pages/UsersDashboard'  // Fixed: Changed from UsersDashboard to UserDashboard
 import EmailVerificationPage from './pages/EmailVerificationPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'  // Added: Import for ResetPasswordPage
-
+import StudentsPage from './pages/StudentsPage'
 function App() {
   return (
     <Router>
@@ -15,9 +15,10 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/users/dashboard/" element={<UserDashboard />} />
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/forgot-password" element={<ResetPasswordPage />} />  {/* Fixed: Changed to ResetPasswordPage */}
+        <Route path="/forgot-password" element={<ResetPasswordPage />} />
         <Route path="/auth/verify-email" element={<EmailVerificationPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />  {/* Added: Route for reset password */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/students" element={<StudentsPage />} /> 
       </Routes>
     </Router>
   )

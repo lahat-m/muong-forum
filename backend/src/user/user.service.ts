@@ -1,4 +1,4 @@
-// src/users/users.service.ts
+// src/user/user.service.ts
 
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -6,9 +6,9 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateEventDto } from 'src/event/dto/update-event.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { ConfigService } from '@nestjs/config';
-import { Prisma, UserRole } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { MailerService } from 'src/mail/mail.service';
+import { UserRole } from '@prisma/client';
 const roundsOfHashing = parseInt(process.env.PASSWORD_HASH_ROUNDS || '10');
 
 @Injectable()
@@ -72,19 +72,19 @@ async createUser(createUserDto: CreateUserDto) {
         data: {
           email: createUserDto.email,
           password: bcrypt.hashSync(createUserDto.password, roundsOfHashing),
-          role: 'USER',
+          role: 'USER', // UserRole enum type is correctly inferred here from schema
           firstName: createUserDto.firstName,
           lastName: createUserDto.lastName,
           username: createUserDto.username,
         }
       });
-      
+
       // Generate verification token
       const verificationToken = uuidv4();
       const tokenExpiresAt = new Date(
         Date.now() + parseInt(process.env.EMAIL_TOKEN_EXPIRATION || '86400') * 1000
       );
-      
+
       // Create email verification record
       await prisma.emailVerification.create({
         data: {
@@ -102,24 +102,24 @@ async createUser(createUserDto: CreateUserDto) {
           metaData: { email: user.email }
         }
       });
-      
+
       return { user, verificationToken };
     });
 
     // Send verification email outside transaction
     await this.mailerService.sendVerificationEmail(
-      result.user.email, 
+      result.user.email,
       result.verificationToken
     );
-    
-    return { 
+
+    return {
       message: "Registration successful. Check your email to verify your account",
       email: result.user.email
     };
 
   } catch (error) {
-    // Handle known Prisma errors
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    // Corrected usage: Use PrismaClientKnownRequestError directly after importing it
+    if (error instanceof PrismaClientKnownRequestError) {
       switch (error.code) {
         case 'P2002':
           const field = error.meta?.target?.[0] || 'field';
@@ -131,7 +131,7 @@ async createUser(createUserDto: CreateUserDto) {
           throw new InternalServerErrorException('Registration failed');
       }
     }
-    
+
     // Handle custom business logic errors
     if (error instanceof ConflictException || error instanceof BadRequestException) {
       throw error;
@@ -142,13 +142,13 @@ async createUser(createUserDto: CreateUserDto) {
     throw new InternalServerErrorException('Registration failed');
   }
 }
-      
+
     // Create an admin user. This should be behind proper authentication/guard.
     async createAdmin(createUserDto: CreateUserDto) {
         try {
             const adminData = {
                 ...createUserDto,
-                role: 'ADMIN', // Force role to ADMIN
+                role: UserRole.ADMIN, // Use the imported UserRole enum directly
                 password: bcrypt.hashSync(createUserDto.password, roundsOfHashing),
             } as any;
             const admin = await this.prisma.user.create({

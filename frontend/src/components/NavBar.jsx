@@ -1,7 +1,11 @@
-// NavBar.jsx
+// src/components/NavBar.jsx
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Home, Calendar, Users, Mail, LogIn, ArrowUpRight } from "lucide-react";
+import {
+  Menu, X, Home, Calendar, Users, Mail, LogIn, ArrowUpRight, // Existing icons
+  BookOpen, // Kept for Students link
+} from "lucide-react";
 
 const NavBar = () => {
     const navigate = useNavigate();
@@ -9,18 +13,22 @@ const NavBar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    
+
     // Check if user is authenticated
     useEffect(() => {
         const token = localStorage.getItem('ACCESS_TOKEN');
+        // Ensure USER is parsed, default to empty object if not found
         const user = JSON.parse(localStorage.getItem('USER') || '{}');
-        
+
+        // Authentication is considered true if token exists AND user ID or role exists
         if (token && (user.id || user.role)) {
             setIsAuthenticated(true);
+        } else {
+            setIsAuthenticated(false);
         }
-    }, [location]);
-    
-    // Handle scroll effect
+    }, [location.pathname]); // Re-run when route changes
+
+    // Handle scroll effect for dynamic navbar styling
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 30) {
@@ -29,41 +37,49 @@ const NavBar = () => {
                 setScrolled(false);
             }
         };
-        
+
         window.addEventListener('scroll', handleScroll);
+        // Clean up the event listener on component unmount
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-    
+
     // Navigation items
     const navItems = [
         { name: 'Home', path: '/', icon: <Home className="h-4 w-4" /> },
         { name: 'Events', path: '/events', icon: <Calendar className="h-4 w-4" /> },
+        { name: 'Students', path: '/students', icon: <BookOpen className="h-4 w-4" /> },
         { name: 'About', path: '/about', icon: <Users className="h-4 w-4" /> },
         { name: 'Contact', path: '/contact', icon: <Mail className="h-4 w-4" /> },
     ];
-    
-    // Check if path is active
+
+    // Check if path is active for styling
     const isActivePath = (path) => {
         if (path === '/') {
             return location.pathname === path;
         }
         return location.pathname.startsWith(path);
     };
-    
-    // Handle navigation for auth
+
+    // Handle navigation for auth/dashboard button
     const handleAuthNav = () => {
         const user = JSON.parse(localStorage.getItem('USER') || '{}');
-        
+
         if (isAuthenticated) {
+            // Navigate to admin dashboard if admin, else user dashboard
             if (user.role === 'ADMIN') {
-                navigate('/dashboard');
+                navigate('/dashboard'); // Assuming admin dashboard path
             } else {
-                navigate('/users/dashboard');
+                navigate('/users/dashboard'); // Assuming regular user dashboard path
             }
         } else {
-            navigate('/auth');
+            navigate('/auth'); // Navigate to login/register page
         }
-        
+        setIsOpen(false); // Close mobile menu after navigation
+    };
+
+    // Handle general navigation for mobile menu links
+    const handleMobileNavigation = (path) => {
+        navigate(path);
         setIsOpen(false);
     };
 
@@ -71,24 +87,26 @@ const NavBar = () => {
         <nav
             className={`
                 fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-                    scrolled 
-                        ? 'bg-black/70 backdrop-blur-md py-2' 
+                    scrolled
+                        ? 'bg-black/70 backdrop-blur-md py-2'
                         : 'bg-transparent py-5'
                 }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
                 {/* Logo */}
-                <Link 
+                <Link
                     to="/"
                     className="flex items-center transition-transform hover:scale-105"
                 >
                     <div className="relative">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center shadow-lg">
                             <span className="text-white font-bold text-xl">M</span>
+                            {/* Small decorative dot for the logo */}
                             <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-white"></div>
                         </div>
                     </div>
                     <div className="ml-2">
+                        {/* Dynamic text color based on scroll */}
                         <span className={`font-bold text-lg ${scrolled ? 'text-white' : 'text-white'}`}>
                             Muong Forum
                         </span>
@@ -117,7 +135,8 @@ const NavBar = () => {
                             </Link>
                         ))}
                     </div>
-                    
+
+                    {/* Auth/Dashboard Button for Desktop */}
                     <button
                         onClick={handleAuthNav}
                         className={`ml-4 px-4 py-2 font-medium rounded-full transition-all duration-300 flex items-center ${
@@ -138,13 +157,13 @@ const NavBar = () => {
                     </button>
                 </div>
 
-                {/* Mobile toggle */}
+                {/* Mobile Menu Button */}
                 <div className="md:hidden">
-                    <button 
-                        onClick={() => setIsOpen(!isOpen)} 
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
                         className={`p-2 rounded-full ${
-                            isOpen 
-                                ? 'bg-white/10 text-white' 
+                            isOpen
+                                ? 'bg-white/10 text-white'
                                 : 'text-white hover:bg-white/10'
                         }`}
                         aria-label="Toggle menu"
@@ -154,11 +173,11 @@ const NavBar = () => {
                 </div>
             </div>
 
-            {/* Mobile Menu */}
-            <div 
+            {/* Mobile Menu Overlay */}
+            <div
                 className={`fixed inset-0 z-40 bg-black/90 backdrop-blur-lg transition-all duration-300 md:hidden ${
-                    isOpen 
-                        ? 'opacity-100 pointer-events-auto translate-y-0' 
+                    isOpen
+                        ? 'opacity-100 pointer-events-auto translate-y-0'
                         : 'opacity-0 pointer-events-none -translate-y-8'
                 }`}
             >
@@ -168,7 +187,7 @@ const NavBar = () => {
                             <Link
                                 key={item.name}
                                 to={item.path}
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => handleMobileNavigation(item.path)}
                                 className={`px-5 py-4 rounded-xl font-medium text-lg transition-all duration-300 ${
                                     isActivePath(item.path)
                                         ? 'bg-gradient-to-r from-green-500 to-blue-600 text-white'
@@ -182,7 +201,8 @@ const NavBar = () => {
                             </Link>
                         ))}
                     </div>
-                    
+
+                    {/* Auth/Dashboard Button for Mobile */}
                     <div className="mt-auto pt-8 border-t border-white/10">
                         <button
                             onClick={handleAuthNav}
@@ -201,7 +221,8 @@ const NavBar = () => {
                                 </>
                             )}
                         </button>
-                        
+
+                        {/* Copyright */}
                         <div className="mt-8 text-center text-white/40 text-sm">
                             <p>Muong Forum © 2025</p>
                         </div>

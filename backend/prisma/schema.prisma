@@ -32,7 +32,8 @@ model User {
   updatedAt          DateTime            @updatedAt @map("updated_at")
 
   emailVerifications EmailVerification[]
-  passwordResetTokens PasswordResetToken[] // New relation
+  passwordResetTokens PasswordResetToken[]
+  studentProfile    Student?
 }
 
 model EmailVerification {
@@ -111,4 +112,38 @@ model AuditLog {
   @@index([action])
   @@index([userId])
   @@index([createdAt])
+}
+
+
+model Student {
+   id                Int           @id @default(autoincrement())
+  userId            Int           @unique // One-to-one relation with User
+  name              String
+  registrationNumber String        @unique
+  course            String
+  faculty           String
+  graduated         Boolean       @default(false)
+  enrollmentYear    Int
+  profilePhoto     String?   
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills            StudentSkill[] // One-to-many relation with StudentSkill
+
+  @@map("students") // Optional: map to a different table name in the DB
+}
+
+model StudentSkill {
+  id                Int      @id @default(autoincrement())
+  studentId         Int
+  name              String
+  yearsOfExperience Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  student           Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, name]) // A student should not have duplicate skills by name
+  @@map("student_skills") // Optional: map to a different table name in the DB
 }
