@@ -3,15 +3,18 @@ import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { CreateStudentDto } from './create-student.dto';
 import { IsArray, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { UpdateStudentSkillDto } from './update-student-skill.dto'; // Import the UpdateStudentSkillDto
+import { UpdateStudentSkillDto } from './update-student-skill.dto';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
-// Omit 'skills' from the base type to avoid type conflict
 export class UpdateStudentDto extends PartialType(OmitType(CreateStudentDto, ['skills'] as const)) {
-  // Explicitly define the skills array type as UpdateStudentSkillDto[]
-  // This tells TypeScript that elements here can have the 'id' property.
-  @IsArray()
+  @ApiPropertyOptional({
+    description: 'Array of student skills with optional IDs for updates',
+    type: [UpdateStudentSkillDto],
+    example: [{ id: 1, name: 'React.js', yearsOfExperience: 4 }],
+  })
+  @IsArray({ message: 'Skills must be an array' })
   @ValidateNested({ each: true })
-  @Type(() => UpdateStudentSkillDto) // Ensure class-transformer knows to transform to this type
+  @Type(() => UpdateStudentSkillDto)
   @IsOptional()
   skills?: UpdateStudentSkillDto[];
 }
